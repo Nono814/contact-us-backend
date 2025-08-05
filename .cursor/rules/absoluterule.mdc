@@ -1,0 +1,161 @@
+---
+alwaysApply: true
+---
+1. 数据库的主机是dbconn.sealosbja.site，port:43919, username:root, password:qrzk4ts4
+2. 我的建表语句是如下
+- 1. 招聘服务表 (Hiring Service)
+CREATE TABLE IF NOT EXISTS hiring_submissions (
+id INT AUTO_INCREMENT PRIMARY KEY,
+language VARCHAR(10) DEFAULT 'en' COMMENT '语言',
+
+-- 基本信息
+name VARCHAR(100) NOT NULL COMMENT '联系人姓名',
+email VARCHAR(100) NOT NULL COMMENT '邮箱地址',
+company VARCHAR(100) COMMENT '公司名称',
+
+-- 招聘相关信息
+company_size VARCHAR(50) COMMENT '公司规模',
+role_type VARCHAR(50) COMMENT '职位类型',
+special_requirements TEXT COMMENT '特殊要求',
+
+-- 元数据
+ip_address VARCHAR(45) COMMENT 'IP地址',
+user_agent TEXT COMMENT '用户代理',
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+
+-- 索引
+INDEX idx_email (email),
+INDEX idx_company (company),
+INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='招聘服务提交记录表';
+
+-- 2. 雇主品牌服务表 (Employer Branding Service)
+CREATE TABLE IF NOT EXISTS employer_branding_submissions (
+id INT AUTO_INCREMENT PRIMARY KEY,
+language VARCHAR(10) DEFAULT 'en' COMMENT '语言',
+
+-- 基本信息
+name VARCHAR(100) NOT NULL COMMENT '联系人姓名',
+email VARCHAR(100) NOT NULL COMMENT '邮箱地址',
+company_name VARCHAR(100) NOT NULL COMMENT '公司名称',
+
+-- 雇主品牌相关信息
+company_size VARCHAR(50) COMMENT '公司规模',
+industry VARCHAR(50) COMMENT '行业',
+website VARCHAR(200) COMMENT '公司网站',
+additional_info TEXT COMMENT '附加信息/需求描述',
+
+-- 元数据
+ip_address VARCHAR(45) COMMENT 'IP地址',
+user_agent TEXT COMMENT '用户代理',
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+
+-- 索引
+INDEX idx_email (email),
+INDEX idx_company_name (company_name),
+INDEX idx_industry (industry),
+INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='雇主品牌服务提交记录表';
+
+-- 3. 人工数据服务表 (Human Data Service)
+CREATE TABLE IF NOT EXISTS human_data_submissions (
+id INT AUTO_INCREMENT PRIMARY KEY,
+language VARCHAR(10) DEFAULT 'en' COMMENT '语言',
+
+-- 基本信息
+name VARCHAR(100) NOT NULL COMMENT '联系人姓名',
+email VARCHAR(100) NOT NULL COMMENT '邮箱地址',
+
+-- 人工数据相关信息
+data_type VARCHAR(50) COMMENT '数据类型',
+expertise_area VARCHAR(50) COMMENT '专业领域',
+timeline VARCHAR(50) COMMENT '项目时间线',
+project_details TEXT COMMENT '项目详细描述',
+
+-- 元数据
+ip_address VARCHAR(45) COMMENT 'IP地址',
+user_agent TEXT COMMENT '用户代理',
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+
+-- 索引
+INDEX idx_email (email),
+INDEX idx_data_type (data_type),
+INDEX idx_expertise_area (expertise_area),
+INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='人工数据服务提交记录表';
+
+-- 4. 数字克隆服务表 (Digital Clone Service)
+CREATE TABLE IF NOT EXISTS digital_clone_submissions (
+id INT AUTO_INCREMENT PRIMARY KEY,
+language VARCHAR(10) DEFAULT 'en' COMMENT '语言',
+
+-- 基本信息
+name VARCHAR(100) NOT NULL COMMENT '联系人姓名',
+email VARCHAR(100) NOT NULL COMMENT '邮箱地址',
+
+-- 数字克隆相关信息
+expertise_field VARCHAR(50) COMMENT '专业领域',
+experience VARCHAR(50) COMMENT '经验水平',
+target_audience VARCHAR(50) COMMENT '目标受众',
+monetization_goal VARCHAR(50) COMMENT '变现目标',
+time_commitment VARCHAR(50) COMMENT '时间投入',
+background TEXT COMMENT '个人背景/详细描述',
+
+-- 元数据
+ip_address VARCHAR(45) COMMENT 'IP地址',
+user_agent TEXT COMMENT '用户代理',
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+
+-- 索引
+INDEX idx_email (email),
+INDEX idx_expertise_field (expertise_field),
+INDEX idx_target_audience (target_audience),
+INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='数字克隆服务提交记录表';
+
+-- 5. 其他咨询表 (Other Inquiries)
+CREATE TABLE IF NOT EXISTS other_inquiries (
+id INT AUTO_INCREMENT PRIMARY KEY,
+language VARCHAR(10) DEFAULT 'en' COMMENT '语言',
+
+-- 基本信息
+name VARCHAR(100) NOT NULL COMMENT '联系人姓名',
+email VARCHAR(100) NOT NULL COMMENT '邮箱地址',
+company VARCHAR(100) COMMENT '公司名称(可选)',
+
+-- 咨询信息
+inquiry_type VARCHAR(50) COMMENT '咨询类型',
+message TEXT NOT NULL COMMENT '留言内容',
+
+-- 元数据
+ip_address VARCHAR(45) COMMENT 'IP地址',
+user_agent TEXT COMMENT '用户代理',
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+
+-- 索引
+INDEX idx_email (email),
+INDEX idx_inquiry_type (inquiry_type),
+INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='其他咨询提交记录表';
+
+-- 查看所有表
+SHOW TABLES;
+
+-- 查看各表结构
+DESC hiring_submissions;
+DESC employer_branding_submissions;
+DESC human_data_submissions;
+DESC digital_clone_submissions;
+DESC other_inquiries;
+
+-- 查看表创建语句
+SHOW CREATE TABLE hiring_submissions;
+SHOW CREATE TABLE employer_branding_submissions;
+SHOW CREATE TABLE human_data_submissions;
+SHOW CREATE TABLE digital_clone_submissions;
+SHOW CREATE TABLE other_inquiries;

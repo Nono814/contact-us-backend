@@ -1,0 +1,435 @@
+{
+  "info": {
+    "name": "Get in Touch API",
+    "description": "联系表单API服务 - 包含招聘、雇主品牌、人工数据等服务",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "name": "本地开发",
+      "url": "http://localhost:3001"
+    },
+    {
+      "name": "生产环境",
+      "url": "https://your-production-domain.com"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "健康检查",
+        "description": "检查API服务状态",
+        "tags": ["系统"],
+        "responses": {
+          "200": {
+            "description": "服务正常",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "OK"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "example": "2024-08-04T12:00:00.000Z"
+                    },
+                    "service": {
+                      "type": "string",
+                      "example": "Contact Form API"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/contact": {
+      "post": {
+        "summary": "提交联系表单",
+        "description": "提交各种服务的联系表单数据",
+        "tags": ["表单提交"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "title": "招聘服务",
+                    "properties": {
+                      "service": {
+                        "type": "string",
+                        "enum": ["hiring"],
+                        "description": "服务类型"
+                      },
+                      "_language": {
+                        "type": "string",
+                        "default": "en",
+                        "description": "语言代码"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "联系人姓名"
+                      },
+                      "email": {
+                        "type": "string",
+                        "format": "email",
+                        "description": "邮箱地址"
+                      },
+                      "company": {
+                        "type": "string",
+                        "description": "公司名称"
+                      },
+                      "companySize": {
+                        "type": "string",
+                        "description": "公司规模"
+                      },
+                      "roleType": {
+                        "type": "string",
+                        "description": "职位类型"
+                      },
+                      "specialRequirements": {
+                        "type": "string",
+                        "description": "特殊要求"
+                      }
+                    },
+                    "required": ["service", "name", "email"]
+                  },
+                  {
+                    "type": "object",
+                    "title": "雇主品牌服务",
+                    "properties": {
+                      "service": {
+                        "type": "string",
+                        "enum": ["employerBranding"],
+                        "description": "服务类型"
+                      },
+                      "_language": {
+                        "type": "string",
+                        "default": "en",
+                        "description": "语言代码"
+                      },
+                      "employerBranding_name": {
+                        "type": "string",
+                        "description": "联系人姓名"
+                      },
+                      "employerBranding_email": {
+                        "type": "string",
+                        "format": "email",
+                        "description": "邮箱地址"
+                      },
+                      "employerBranding_companyName": {
+                        "type": "string",
+                        "description": "公司名称"
+                      },
+                      "employerBranding_companySize": {
+                        "type": "string",
+                        "description": "公司规模"
+                      },
+                      "industry": {
+                        "type": "string",
+                        "description": "行业"
+                      },
+                      "website": {
+                        "type": "string",
+                        "format": "uri",
+                        "description": "公司网站"
+                      },
+                      "additionalInfo": {
+                        "type": "string",
+                        "description": "附加信息/需求描述"
+                      }
+                    },
+                    "required": ["service", "employerBranding_name", "employerBranding_email", "employerBranding_companyName"]
+                  },
+                  {
+                    "type": "object",
+                    "title": "人工数据服务",
+                    "properties": {
+                      "service": {
+                        "type": "string",
+                        "enum": ["humanData"],
+                        "description": "服务类型"
+                      },
+                      "_language": {
+                        "type": "string",
+                        "default": "en",
+                        "description": "语言代码"
+                      },
+                      "humanData_name": {
+                        "type": "string",
+                        "description": "联系人姓名"
+                      },
+                      "humanData_email": {
+                        "type": "string",
+                        "format": "email",
+                        "description": "邮箱地址"
+                      },
+                      "dataType": {
+                        "type": "string",
+                        "description": "数据类型"
+                      },
+                      "expertiseArea": {
+                        "type": "string",
+                        "description": "专业领域"
+                      },
+                      "timeline": {
+                        "type": "string",
+                        "description": "项目时间线"
+                      },
+                      "projectDetails": {
+                        "type": "string",
+                        "description": "项目详细描述"
+                      }
+                    },
+                    "required": ["service", "humanData_name", "humanData_email"]
+                  }
+                ]
+              },
+              "examples": {
+                "招聘服务": {
+                  "summary": "招聘服务提交示例",
+                  "value": {
+                    "service": "hiring",
+                    "_language": "zh",
+                    "name": "张三",
+                    "email": "zhangsan@example.com",
+                    "company": "ABC科技有限公司",
+                    "companySize": "51-200人",
+                    "roleType": "前端工程师",
+                    "specialRequirements": "需要有React经验"
+                  }
+                },
+                "雇主品牌服务": {
+                  "summary": "雇主品牌服务提交示例",
+                  "value": {
+                    "service": "employerBranding",
+                    "_language": "zh",
+                    "employerBranding_name": "王经理",
+                    "employerBranding_email": "hr@xyz.com",
+                    "employerBranding_companyName": "XYZ集团",
+                    "employerBranding_companySize": "500+",
+                    "industry": "互联网",
+                    "website": "https://www.xyz.com",
+                    "additionalInfo": "希望提升雇主品牌形象"
+                  }
+                },
+                "人工数据服务": {
+                  "summary": "人工数据服务提交示例",
+                  "value": {
+                    "service": "humanData",
+                    "_language": "en",
+                    "humanData_name": "李四",
+                    "humanData_email": "lisi@example.com",
+                    "dataType": "文本标注",
+                    "expertiseArea": "自然语言处理",
+                    "timeline": "1-3个月",
+                    "projectDetails": "需要标注10万条中文语料"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "提交成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Contact form submitted successfully"
+                    },
+                    "id": {
+                      "type": "integer",
+                      "example": 123
+                    },
+                    "redirectUrl": {
+                      "type": "string",
+                      "example": "/thank-you?lang=zh"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Service type is required"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Internal server error"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Failed to process contact form submission"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/contacts": {
+      "get": {
+        "summary": "获取联系表单记录",
+        "description": "管理员获取联系表单提交记录",
+        "tags": ["管理后台"],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "页码",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "每页数量",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50
+            }
+          },
+          {
+            "name": "service",
+            "in": "query",
+            "description": "服务类型筛选",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["hiring", "employerBranding", "humanData", "digitalClone", "other"]
+            }
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "description": "开始日期 (YYYY-MM-DD)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "description": "结束日期 (YYYY-MM-DD)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "获取成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer",
+                          "example": 150
+                        },
+                        "page": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "example": 20
+                        },
+                        "totalPages": {
+                          "type": "integer",
+                          "example": 8
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "系统",
+      "description": "系统相关接口"
+    },
+    {
+      "name": "表单提交",
+      "description": "各种服务的表单提交接口"
+    },
+    {
+      "name": "管理后台",
+      "description": "管理后台相关接口"
+    }
+  ]
+} 
