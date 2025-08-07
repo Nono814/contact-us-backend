@@ -1,0 +1,22 @@
+# dependencies
+node_modules/
+
+# env files
+config.env
+config.production.env
+
+# logs
+logs/
+*.log
+server.log
+
+# editor
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# others
+.env
+.env.*

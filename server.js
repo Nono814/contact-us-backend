@@ -10,7 +10,7 @@ const { initDatabase } = require('./config/database');
 const { verifyEmailConfig } = require('./services/emailNotification');
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 8080;
 
 // 信任代理设置（解决 X-Forwarded-For 警告）
 app.set('trust proxy', true);
@@ -24,6 +24,7 @@ app.use(cors({
     'http://localhost:3000',
     'http://localhost:5173',
     'https://yoursite.com',
+    'https://qhdcfzhshdux.sealosbja.site',
     '*'
   ],
   credentials: true

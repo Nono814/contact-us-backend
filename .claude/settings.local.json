@@ -12,7 +12,9 @@
       "Bash(journalctl:*)",
       "Bash(ss:*)",
       "Bash(cat:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(lsof:*)",
+      "Bash(grep:*)"
     ],
     "deny": []
   }
