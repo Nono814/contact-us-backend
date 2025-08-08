@@ -1,7 +1,3 @@
-
-> contact-form-api@1.0.0 start
-> node server.js
-
 数据库 get in touch 创建成功或已存在
 数据库连接成功
 数据库表创建完成
@@ -9,14 +5,3 @@
 服务器运行在端口 8080
 健康检查: http://localhost:8080/health
 管理后台: http://localhost:8080/admin
-ValidationError: The Express 'trust proxy' setting is true, which allows anyone to trivially bypass IP-based rate limiting. See https://express-rate-limit.github.io/ERR_ERL_PERMISSIVE_TRUST_PROXY/ for more information.
-    at _Validations.<anonymous> (/home/devbox/project/node_modules/express-rate-limit/dist/index.cjs:160:15)
-    at _Validations.wrap (/home/devbox/project/node_modules/express-rate-limit/dist/index.cjs:313:18)
-    at _Validations.trustProxy (/home/devbox/project/node_modules/express-rate-limit/dist/index.cjs:158:10)
-    at Object.keyGenerator (/home/devbox/project/node_modules/express-rate-limit/dist/index.cjs:541:19)
-    at /home/devbox/project/node_modules/express-rate-limit/dist/index.cjs:595:32
-    at async /home/devbox/project/node_modules/express-rate-limit/dist/index.cjs:576:5 {
-  code: 'ERR_ERL_PERMISSIVE_TRUST_PROXY',
-  help: 'https://express-rate-limit.github.io/ERR_ERL_PERMISSIVE_TRUST_PROXY/'
-}
-✅ 邮件通知发送成功 - 招聘服务 - ID: 15
