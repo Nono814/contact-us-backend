@@ -1,6 +1,6 @@
 module.exports = {
   apps: [{
-    name: 'contact-form-api',
+    name: 'officialwebbackend',
     script: 'server.js',
     instances: 'max', // 使用所有CPU核心
     exec_mode: 'cluster',

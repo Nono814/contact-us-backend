@@ -1,7 +1,7 @@
 # 🚀 云服务器部署指南
 
 ## 概述
-本指南将帮助你将 Contact Form API 部署到云服务器上。
+本指南将帮助你将 officialwebbackend 部署到云服务器上。
 
 ## 前置要求
 
@@ -65,10 +65,10 @@ chmod +x deploy-production.sh
 sudo cp /etc/nginx/sites-available/default /etc/nginx/sites-available/default.backup
 
 # 复制我们的配置
-sudo cp nginx.conf /etc/nginx/sites-available/contact-api
+sudo cp nginx.conf /etc/nginx/sites-available/officialwebbackend
 
 # 创建软链接
-sudo ln -s /etc/nginx/sites-available/contact-api /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/officialwebbackend /etc/nginx/sites-enabled/
 
 # 删除默认配置
 sudo rm /etc/nginx/sites-enabled/default
@@ -105,14 +105,14 @@ sudo crontab -e
 pm2 status
 
 # 查看日志
-pm2 logs contact-form-api
+pm2 logs officialwebbackend
 
 # 监控资源使用
 pm2 monit
 
 # 查看 Nginx 日志
-sudo tail -f /var/log/nginx/contact-api-access.log
-sudo tail -f /var/log/nginx/contact-api-error.log
+sudo tail -f /var/log/nginx/officialwebbackend-access.log
+sudo tail -f /var/log/nginx/officialwebbackend-error.log
 ```
 
 ## 环境变量配置
@@ -142,16 +142,16 @@ ADMIN_EMAILS=18264190169@163.com,zzw814@163.com
 ### PM2 管理
 ```bash
 # 重启应用
-pm2 restart contact-form-api
+pm2 restart officialwebbackend
 
 # 停止应用
-pm2 stop contact-form-api
+pm2 stop officialwebbackend
 
 # 查看详细信息
-pm2 show contact-form-api
+pm2 show officialwebbackend
 
 # 查看日志
-pm2 logs contact-form-api --lines 100
+pm2 logs officialwebbackend --lines 100
 ```
 
 ### Nginx 管理
@@ -171,13 +171,13 @@ sudo nginx -s reload
 ### 1. 应用无法启动
 ```bash
 # 检查日志
-pm2 logs contact-form-api
+pm2 logs officialwebbackend
 
 # 检查端口占用
 sudo netstat -tlnp | grep :8080
 
 # 检查环境变量
-pm2 env contact-form-api
+pm2 env officialwebbackend
 ```
 
 ### 2. 数据库连接失败
@@ -241,6 +241,6 @@ sudo tail -f /var/log/nginx/error.log
 ## 联系支持
 
 如果遇到问题，请检查：
-1. 应用日志：`pm2 logs contact-form-api`
-2. Nginx 日志：`sudo tail -f /var/log/nginx/contact-api-error.log`
+1. 应用日志：`pm2 logs officialwebbackend`
+2. Nginx 日志：`sudo tail -f /var/log/nginx/officialwebbackend-error.log`
 3. 系统日志：`sudo journalctl -u nginx` 

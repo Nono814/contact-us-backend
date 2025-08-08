@@ -3,7 +3,7 @@
 # 生产环境部署脚本
 set -e
 
-echo "🚀 开始部署 Contact Form API 到生产环境..."
+echo "🚀 开始部署 officialwebbackend 到生产环境..."
 
 # 颜色定义
 RED='\033[0;31m'
@@ -83,8 +83,8 @@ testDB();
 
 # 停止现有进程
 log_info "停止现有PM2进程..."
-pm2 stop contact-form-api 2>/dev/null || true
-pm2 delete contact-form-api 2>/dev/null || true
+pm2 stop officialwebbackend 2>/dev/null || true
+pm2 delete officialwebbackend 2>/dev/null || true
 
 # 启动应用
 log_info "启动应用..."
@@ -100,11 +100,11 @@ log_info "等待应用启动..."
 sleep 5
 
 # 检查应用状态
-if pm2 list | grep -q "contact-form-api.*online"; then
+if pm2 list | grep -q "officialwebbackend.*online"; then
     log_info "✅ 应用启动成功"
 else
     log_error "❌ 应用启动失败"
-    pm2 logs contact-form-api --lines 20
+    pm2 logs officialwebbackend --lines 20
     exit 1
 fi
 
@@ -121,10 +121,10 @@ fi
 # 显示应用信息
 log_info "应用信息:"
 pm2 list
-pm2 show contact-form-api
+pm2 show officialwebbackend
 
 log_info "🎉 部署完成!"
 log_info "应用运行在: http://localhost:8080"
 log_info "健康检查: http://localhost:8080/health"
 log_info "管理后台: http://localhost:8080/admin"
-log_info "查看日志: pm2 logs contact-form-api" 
+log_info "查看日志: pm2 logs officialwebbackend" 
