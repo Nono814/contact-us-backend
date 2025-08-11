@@ -1,3 +1,38 @@
+## Analytics Ingest Service (FastAPI)
+
+基于 FastAPI 的埋点采集后端，支持单条与批量上报、sendBeacon text/plain 兼容、幂等写入、rid 兜底与透传。
+
+快速使用:
+
+```bash
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+export DB_HOST=dbconn.sealosbja.site
+export DB_PORT=43919
+export DB_USER=root
+export DB_PASSWORD=qrzk4ts4
+export DB_NAME=analytics
+uvicorn app.main:app --port 8080
+```
+
+创建表结构:
+
+```bash
+mysql -h $DB_HOST -P $DB_PORT -u $DB_USER -p$DB_PASSWORD < schema.sql
+```
+
+接口:
+- POST /analytics/track
+- POST /analytics/track/batch
+
+Docker:
+```bash
+docker build -t analytics-ingest:latest .
+docker run -p 8080:8080 \
+  -e DB_HOST=$DB_HOST -e DB_PORT=$DB_PORT -e DB_USER=$DB_USER -e DB_PASSWORD=$DB_PASSWORD -e DB_NAME=$DB_NAME \
+  analytics-ingest:latest
+```
+
 # 联系表单API服务
 
 这是一个基于Node.js和Express的联系表单API服务，支持多种服务类型的表单提交和管理。
