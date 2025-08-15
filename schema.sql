@@ -45,4 +45,26 @@ PARTITION p20250811 VALUES LESS THAN (TO_DAYS('2025-08-12')),
 PARTITION pmax VALUES LESS THAN MAXVALUE
 );
 
+-- Demo预约表
+CREATE TABLE demo_bookings (
+  id VARCHAR(50) PRIMARY KEY,
+  first_name VARCHAR(50) NOT NULL,
+  last_name VARCHAR(50) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  company VARCHAR(100) NOT NULL,
+  roles JSON NOT NULL,
+  main_goal VARCHAR(50) NOT NULL,
+  budget VARCHAR(50) NOT NULL,
+  email_updates VARCHAR(10) NOT NULL,
+  language VARCHAR(5) DEFAULT 'en',
+  timestamp DATETIME(3) NOT NULL,
+  created_at DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3),
+  updated_at DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  
+  INDEX idx_email (email),
+  INDEX idx_company (company),
+  INDEX idx_timestamp (timestamp),
+  INDEX idx_created_at (created_at)
+);
+
 

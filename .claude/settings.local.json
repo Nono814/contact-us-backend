@@ -14,8 +14,17 @@
       "Bash(cat:*)",
       "Bash(rm:*)",
       "Bash(lsof:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(pm2 stop:*)",
+      "Bash(mysql:*)",
+      "Bash(chmod:*)",
+      "Bash(./verify_deployment.sh)",
+      "WebFetch(domain:learn.microsoft.com)",
+      "Bash(python:*)",
+      "Bash(uvicorn:*)",
+      "Bash(git add:*)"
     ],
-    "deny": []
+    "deny": [],
+    "defaultMode": "acceptEdits"
   }
 }

@@ -2,17 +2,17 @@ const nodemailer = require('nodemailer');
 
 // 邮件配置
 const EMAIL_CONFIG = {
-  // 管理员邮箱列表
-  adminEmails: ['18264190169@163.com', 'zzw814@163.com'],
+  // 管理员邮箱列表（从环境变量读取，fallback到默认值）
+  adminEmails: process.env.ADMIN_EMAILS ? process.env.ADMIN_EMAILS.split(',') : ['18264190169@163.com', 'zzw814@163.com'],
   
-  // 发送邮箱配置（可以使用163邮箱）
+  // 发送邮箱配置（支持多种SMTP服务器）
   smtp: {
-    host: 'smtp.163.com',
-    port: 465,
-    secure: true,
+    host: process.env.SMTP_HOST || 'smtp.gmail.com', // 默认使用Gmail SMTP，支持自定义域名
+    port: parseInt(process.env.SMTP_PORT) || 587,
+    secure: process.env.SMTP_SECURE === 'true' || false, // STARTTLS
     auth: {
-      user: process.env.SMTP_USER || '18264190169@163.com', // 发送邮箱
-      pass: process.env.SMTP_PASS || 'your_smtp_password'   // 邮箱授权码
+      user: process.env.SMTP_USER || 'contact@daboss.ai', // 发送邮箱
+      pass: process.env.SMTP_PASS || 'your_smtp_password'   // 邮箱密码或应用专用密码
     }
   }
 };
@@ -207,8 +207,149 @@ async function sendNotification(service, data, submissionId) {
   }
 }
 
+// 发送Demo预约邮件通知
+async function sendDemoBookingNotification(bookingData) {
+  try {
+    const {
+      bookingId,
+      firstName,
+      lastName,
+      email,
+      company,
+      roles,
+      mainGoal,
+      budget,
+      emailUpdates,
+      language,
+      timestamp,
+      fieldLabels
+    } = bookingData;
+
+    const currentTime = new Date(timestamp).toLocaleString('zh-CN');
+    
+    // 获取角色标签
+    const roleLabels = roles.map(role => {
+      const roleLabel = fieldLabels.roles[role];
+      return language === 'zh' ? roleLabel.label_zh : roleLabel.label_en;
+    }).join(', ');
+
+    // 获取其他字段标签
+    const mainGoalLabel = fieldLabels.mainGoal[mainGoal];
+    const budgetLabel = fieldLabels.budget[budget];
+    const emailUpdatesLabel = fieldLabels.emailUpdates[emailUpdates];
+
+    const mainGoalText = language === 'zh' ? mainGoalLabel.label_zh : mainGoalLabel.label_en;
+    const budgetText = language === 'zh' ? budgetLabel.label_zh : budgetLabel.label_en;
+    const emailUpdatesText = language === 'zh' ? emailUpdatesLabel.label_zh : emailUpdatesLabel.label_en;
+
+    const subject = `[Demo预约] ${escapeHtml(company)} - ${escapeHtml(firstName)} ${escapeHtml(lastName)}`;
+    
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html lang="zh-CN">
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>新的Demo预约申请</title>
+          <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0; }
+              .content { background: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px; }
+              .booking-badge { display: inline-block; background: #FF5722; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; margin-bottom: 10px; }
+              .details-table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+              .details-table td { padding: 8px; border-bottom: 1px solid #ddd; vertical-align: top; }
+              .details-table td:first-child { width: 120px; color: #666; font-weight: bold; }
+              .footer { text-align: center; color: #666; font-size: 12px; margin-top: 20px; }
+              .id-badge { background: #2196F3; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+              .urgent-note { background: #ffebee; border-left: 4px solid #f44336; padding: 15px; margin: 15px 0; border-radius: 4px; }
+          </style>
+      </head>
+      <body>
+          <div class="container">
+              <div class="header">
+                  <h2>🎯 新的Demo预约申请</h2>
+                  <p>收到了一个新的产品演示预约请求</p>
+              </div>
+              <div class="content">
+                  <div class="booking-badge">Demo预约</div>
+                  <span class="id-badge">ID: ${bookingId}</span>
+                  
+                  <h3>基本信息：</h3>
+                  <table class="details-table">
+                      <tr><td>姓名:</td><td>${escapeHtml(firstName)} ${escapeHtml(lastName)}</td></tr>
+                      <tr><td>邮箱:</td><td>${escapeHtml(email)}</td></tr>
+                      <tr><td>公司:</td><td>${escapeHtml(company)}</td></tr>
+                  </table>
+                  
+                  <h3>详细信息：</h3>
+                  <table class="details-table">
+                      <tr><td>职位:</td><td>${escapeHtml(roleLabels)}</td></tr>
+                      <tr><td>主要需求:</td><td>${escapeHtml(mainGoalText)}</td></tr>
+                      <tr><td>预算范围:</td><td>${escapeHtml(budgetText)}</td></tr>
+                      <tr><td>邮件订阅:</td><td>${escapeHtml(emailUpdatesText)}</td></tr>
+                      <tr><td>语言偏好:</td><td>${language === 'zh' ? '中文' : '英文'}</td></tr>
+                  </table>
+                  
+                  <table class="details-table">
+                      <tr><td>提交时间:</td><td>${currentTime}</td></tr>
+                      <tr><td>提交ID:</td><td>${bookingId}</td></tr>
+                  </table>
+                  
+                  <div class="urgent-note">
+                      <strong>⏰ 处理建议：</strong><br>
+                      请及时联系客户安排Demo演示。建议在1个工作日内回复客户。
+                  </div>
+              </div>
+              <div class="footer">
+                  <p>此邮件由Demo预约系统自动发送 | ${currentTime}</p>
+              </div>
+          </div>
+      </body>
+      </html>
+    `;
+
+    const textContent = `
+新的Demo预约申请
+
+基本信息：
+- 姓名：${firstName} ${lastName}
+- 邮箱：${email}
+- 公司：${company}
+
+详细信息：
+- 职位：${roleLabels}
+- 主要需求：${mainGoalText}
+- 预算范围：${budgetText}
+- 邮件订阅：${emailUpdatesText}
+
+提交时间：${currentTime}
+提交ID：${bookingId}
+
+请及时联系客户安排Demo演示。
+    `;
+
+    const mailOptions = {
+      from: `"Demo预约系统" <${EMAIL_CONFIG.smtp.auth.user}>`,
+      to: process.env.DEMO_NOTIFICATION_EMAIL || EMAIL_CONFIG.adminEmails.join(', '),
+      subject: subject,
+      html: htmlContent,
+      text: textContent
+    };
+
+    const result = await transporter.sendMail(mailOptions);
+    console.log(`✅ Demo预约邮件通知发送成功 - ID: ${bookingId}`);
+    return { success: true, messageId: result.messageId };
+    
+  } catch (error) {
+    console.error('❌ Demo预约邮件发送失败:', error);
+    return { success: false, error: error.message };
+  }
+}
+
 module.exports = {
   sendNotification,
+  sendDemoBookingNotification,
   verifyEmailConfig,
   EMAIL_CONFIG
 };

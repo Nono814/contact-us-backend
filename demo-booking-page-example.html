@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book a Demo - Your Company</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+        }
+        
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 5px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+            margin-right: 8px;
+        }
+        
+        .submit-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            width: 100%;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+        
+        .submit-btn:hover {
+            background-color: #45a049;
+        }
+        
+        .submit-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        
+        .required {
+            color: #e74c3c;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .success-message {
+            display: none;
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Book a Demo</h1>
+        <p>Ready to see how our platform can transform your business? Schedule a personalized demo with our team.</p>
+        
+        <form id="demo-form">
+            <div class="form-group">
+                <label for="firstName">First Name <span class="required">*</span></label>
+                <input type="text" id="firstName" name="firstName" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="lastName">Last Name <span class="required">*</span></label>
+                <input type="text" id="lastName" name="lastName" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Business Email <span class="required">*</span></label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="company">Company Name <span class="required">*</span></label>
+                <input type="text" id="company" name="company" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Your Role <span class="required">*</span></label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="research" name="roles" value="research">
+                        <label for="research">Research</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="engineering" name="roles" value="engineering">
+                        <label for="engineering">Engineering</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="product" name="roles" value="product">
+                        <label for="product">Product</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="operations" name="roles" value="operations">
+                        <label for="operations">Operations</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="recruiting" name="roles" value="recruiting">
+                        <label for="recruiting">Recruiting / HR</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="executive" name="roles" value="executive">
+                        <label for="executive">Executive</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="procurement" name="roles" value="procurement">
+                        <label for="procurement">Procurement / Legal</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="other" name="roles" value="other">
+                        <label for="other">Other</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="mainGoal">Main Goal <span class="required">*</span></label>
+                <select id="mainGoal" name="mainGoal" required>
+                    <option value="">Please select...</option>
+                    <option value="aiTraining">Finding talent for AI training data & evaluation</option>
+                    <option value="hiring">Hiring full-time or contract workers to join my team</option>
+                    <option value="platform">I want to learn more about your platform</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="budget">Budget Range <span class="required">*</span></label>
+                <select id="budget" name="budget" required>
+                    <option value="">Please select...</option>
+                    <option value="large">> $200,000 / quarter (10+ people)</option>
+                    <option value="medium">$50,000 - $200,000 / quarter (3 - 10 people)</option>
+                    <option value="small">< $50,000 / quarter (1 - 2 people)</option>
+                    <option value="explore">No specific project in mind yet, I just want to learn more</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="emailUpdates">Email Updates <span class="required">*</span></label>
+                <select id="emailUpdates" name="emailUpdates" required>
+                    <option value="">Please select...</option>
+                    <option value="yes">Yes, I'd like to receive updates</option>
+                    <option value="no">Not right now</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="language">Preferred Language</label>
+                <select id="language" name="language">
+                    <option value="en">English</option>
+                    <option value="zh">中文</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="submit-btn" id="submit-btn">
+                Book My Demo
+            </button>
+            
+            <div class="loading" id="loading">
+                <p>Submitting your request...</p>
+            </div>
+            
+            <div class="success-message" id="success-message">
+                <h3>Thank you for your interest!</h3>
+                <p>We've received your demo request and will contact you within 1 business day to schedule your personalized demo.</p>
+            </div>
+        </form>
+    </div>
+
+    <!-- 埋点集成脚本 -->
+    <script src="demo-analytics-integration.js"></script>
+    
+    <!-- 表单处理脚本 -->
+    <script>
+        // 处理checkbox的roles字段
+        document.getElementById('demo-form').addEventListener('submit', function(e) {
+            // 收集选中的roles
+            const roles = Array.from(document.querySelectorAll('input[name="roles"]:checked'))
+                .map(cb => cb.value);
+            
+            // 创建隐藏字段存储roles数组
+            let rolesField = document.getElementById('roles-hidden');
+            if (!rolesField) {
+                rolesField = document.createElement('input');
+                rolesField.type = 'hidden';
+                rolesField.id = 'roles-hidden';
+                rolesField.name = 'roles';
+                this.appendChild(rolesField);
+            }
+            rolesField.value = JSON.stringify(roles);
+            
+            // 验证至少选择一个role
+            if (roles.length === 0) {
+                e.preventDefault();
+                alert('Please select at least one role.');
+                return;
+            }
+        });
+
+        // 加载状态管理
+        document.getElementById('demo-form').addEventListener('submit', function() {
+            document.getElementById('submit-btn').disabled = true;
+            document.getElementById('submit-btn').textContent = 'Submitting...';
+            document.getElementById('loading').style.display = 'block';
+        });
+    </script>
+</body>
+</html>

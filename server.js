@@ -6,6 +6,7 @@ require('dotenv').config({ path: './config.env' });
 
 const contactRoutes = require('./routes/contact');
 const adminRoutes = require('./routes/admin');
+const demoBookingRoutes = require('./routes/demoBooking');
 const { initDatabase } = require('./config/database');
 const { verifyEmailConfig } = require('./services/emailNotification');
 
@@ -58,6 +59,7 @@ app.get('/health', (req, res) => {
 
 // API路由
 app.use('/api', contactRoutes);
+app.use('/api', demoBookingRoutes);
 app.use('/api/admin', adminRoutes);
 
 // 管理后台界面
