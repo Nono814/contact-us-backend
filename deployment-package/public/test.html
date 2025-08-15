@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>服务器连接测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #007cba;
+        }
+        .success {
+            background-color: #d4edda;
+            border-left-color: #28a745;
+        }
+        .error {
+            background-color: #f8d7da;
+            border-left-color: #dc3545;
+        }
+        button {
+            background-color: #007cba;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background-color: #005a8b;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>服务器连接测试</h1>
+        <p>这个页面用于测试服务器连接是否正常。</p>
+        
+        <button onclick="testHealth()">测试健康检查</button>
+        <button onclick="testHiringForm()">测试招聘表单</button>
+        <button onclick="testAll()">测试所有接口</button>
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3001';
+        
+        function addResult(title, success, data) {
+            const resultsDiv = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${success ? 'success' : 'error'}`;
+            
+            const status = success ? '✅ 成功' : '❌ 失败';
+            resultDiv.innerHTML = `
+                <h3>${title} - ${status}</h3>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            `;
+            
+            resultsDiv.appendChild(resultDiv);
+        }
+        
+        async function testHealth() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                addResult('健康检查', true, data);
+            } catch (error) {
+                addResult('健康检查', false, { error: error.message });
+            }
+        }
+        
+        async function testHiringForm() {
+            try {
+                const testData = {
+                    service: 'hiring',
+                    _language: 'zh',
+                    name: '测试用户',
+                    email: 'test@example.com',
+                    company: '测试公司',
+                    companySize: '51-200人',
+                    roleType: '前端工程师',
+                    specialRequirements: '测试要求'
+                };
+                
+                const response = await fetch(`${API_BASE}/api/contact`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                const data = await response.json();
+                addResult('招聘表单提交', data.success, data);
+            } catch (error) {
+                addResult('招聘表单提交', false, { error: error.message });
+            }
+        }
+        
+        async function testAll() {
+            document.getElementById('results').innerHTML = '';
+            await testHealth();
+            await testHiringForm();
+        }
+        
+        // 页面加载时自动测试健康检查
+        window.onload = function() {
+            testHealth();
+        };
+    </script>
+</body>
+</html> 

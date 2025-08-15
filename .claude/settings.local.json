@@ -22,7 +22,10 @@
       "WebFetch(domain:learn.microsoft.com)",
       "Bash(python:*)",
       "Bash(uvicorn:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(cp:*)",
+      "Bash(tar:*)",
+      "Bash(zip:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>招聘服务 - 联系我们</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .required {
+            color: #e74c3c;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>招聘服务</h1>
+            <p>让我们帮助您找到最合适的人才</p>
+        </div>
+
+        <div id="alert" class="alert"></div>
+
+        <form id="hiringForm">
+            <div class="form-group">
+                <label for="name">联系人姓名 <span class="required">*</span></label>
+                <input type="text" id="name" name="name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">邮箱地址 <span class="required">*</span></label>
+                <input type="email" id="email" name="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="company">公司名称</label>
+                <input type="text" id="company" name="company">
+            </div>
+
+            <div class="form-group">
+                <label for="companySize">公司规模</label>
+                <select id="companySize" name="companySize">
+                    <option value="">请选择</option>
+                    <option value="1-10人">1-10人</option>
+                    <option value="11-50人">11-50人</option>
+                    <option value="51-200人">51-200人</option>
+                    <option value="201-500人">201-500人</option>
+                    <option value="501-1000人">501-1000人</option>
+                    <option value="1000+人">1000+人</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="roleType">职位类型</label>
+                <select id="roleType" name="roleType">
+                    <option value="">请选择</option>
+                    <option value="前端工程师">前端工程师</option>
+                    <option value="后端工程师">后端工程师</option>
+                    <option value="全栈工程师">全栈工程师</option>
+                    <option value="产品经理">产品经理</option>
+                    <option value="UI/UX设计师">UI/UX设计师</option>
+                    <option value="数据分析师">数据分析师</option>
+                    <option value="运营专员">运营专员</option>
+                    <option value="其他">其他</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="specialRequirements">特殊要求</label>
+                <textarea id="specialRequirements" name="specialRequirements" 
+                          placeholder="请描述您的具体需求，如技能要求、经验要求等"></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+                提交申请
+            </button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>正在提交，请稍候...</p>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('hiringForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const loading = document.getElementById('loading');
+        const alert = document.getElementById('alert');
+
+        function showAlert(message, type = 'success') {
+            alert.textContent = message;
+            alert.className = `alert alert-${type}`;
+            alert.style.display = 'block';
+            
+            if (type === 'success') {
+                setTimeout(() => {
+                    alert.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        function setLoading(isLoading) {
+            submitBtn.disabled = isLoading;
+            loading.style.display = isLoading ? 'block' : 'none';
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(form);
+            const data = {
+                service: 'hiring',
+                _language: 'zh'
+            };
+
+            // 收集表单数据
+            for (let [key, value] of formData.entries()) {
+                if (value.trim()) {
+                    data[key] = value.trim();
+                }
+            }
+
+            setLoading(true);
+            alert.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/contact', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAlert('提交成功！我们会尽快与您联系。', 'success');
+                    form.reset();
+                    
+                    // 可选：跳转到感谢页面
+                    // window.location.href = result.redirectUrl;
+                } else {
+                    showAlert(`提交失败：${result.error}`, 'error');
+                }
+            } catch (error) {
+                console.error('提交错误:', error);
+                showAlert('网络错误，请稍后重试', 'error');
+            } finally {
+                setLoading(false);
+            }
+        });
+    </script>
+</body>
+</html> 
