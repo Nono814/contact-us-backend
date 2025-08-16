@@ -1,6 +1,8 @@
 # 埋点采集服务（Analytics Ingest）传统部署（无 Docker）操作手册
 
-说明：你已完成数据库库 `analytics` 的创建与最终版表 `analytics_events` 的创建。本手册跳过建库/建表步骤，从“准备代码和环境”开始，按顺序执行即可上线。
+说明：你已完成数据库库 `analytics` 的创建与最终版表 `analytics_events` 的创建。本手册跳过建库/建表步骤，从"准备代码和环境"开始，按顺序执行即可上线。
+
+**重要**：本服务使用 8081 端口，避免与主业务 Node.js 服务（8080 端口）冲突。
 
 ## 第1步：准备代码和环境
 - 创建系统用户与部署目录
@@ -26,6 +28,10 @@ pip install -r requirements.txt
 - 新建并编辑 `/etc/analytics-ingest.env`
 ```bash
 sudo tee /etc/analytics-ingest.env >/dev/null <<'EOF'
+# 服务配置
+PORT=8081
+
+# 数据库配置
 DB_HOST=dbconn.sealosbja.site
 DB_PORT=43919
 DB_USER=root
@@ -134,6 +140,10 @@ cd /opt/analytics-ingest
 . ./.venv/bin/activate && pip install -r requirements.txt
 sudo systemctl restart analytics-ingest
 ```
+- 与主业务服务协同部署
+  - Node.js 主服务（officialwebbackend）：8080 端口，处理联系表单等业务
+  - Python 埋点服务（analytics-ingest）：8081 端口，处理埋点数据采集
+  - 两服务可独立部署和重启，互不影响
 - 切换域名
   - 更新 Nginx 的 `server_name` 和证书为新域名
   - 更新 `/etc/analytics-ingest.env` 中 `ALLOWED_ORIGINS=["https://new-domain.com"]`
