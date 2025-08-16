@@ -255,3 +255,215 @@ sudo systemctl restart analytics-ingest
   - 422：校验失败（`eventId/rid/sessionId` 必须 UUID v4；`sessionId` 可不传）
   - 5xx：`journalctl -u analytics-ingest -n 200` 查看错误
   - CORS：如跨域来源变化，更新 `ALLOWED_ORIGINS` 并重启服务
+
+## 第8步：前端接口调用说明
+
+### 服务架构概览
+部署完成后的服务结构：
+```
+域名/IP (80/443) 
+    ↓ Nginx 反向代理
+    ├── /api/ → Node.js 服务 (8080端口) - 联系表单等业务接口
+    └── /api/analytics/ → Python 服务 (8081端口) - 埋点数据接口
+```
+
+### 1. Node.js 主业务接口调用
+
+**接口地址格式**：
+```
+https://your-domain.com/api/{endpoint}
+或 http://115.190.117.78/api/{endpoint}  (无域名时)
+```
+
+**主要接口**：
+- `POST /api/hiring` - 招聘服务提交
+- `POST /api/employer-branding` - 雇主品牌服务提交  
+- `POST /api/human-data` - 人工数据服务提交
+- `POST /api/digital-clone` - 数字克隆服务提交
+- `POST /api/other-inquiry` - 其他咨询提交
+- `GET /api/admin/submissions` - 管理后台数据获取
+
+**前端调用示例**：
+```javascript
+// 招聘服务提交
+const response = await fetch('https://your-domain.com/api/hiring', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    name: '张三',
+    email: 'zhang@example.com',
+    company: '某科技公司',
+    company_size: '100-500人',
+    role_type: '技术岗位',
+    special_requirements: '需要React经验'
+  })
+});
+
+const result = await response.json();
+console.log(result); // { success: true, message: "提交成功" }
+```
+
+### 2. Python 埋点接口调用
+
+**接口地址格式**：
+```
+https://your-domain.com/api/analytics/{endpoint}
+```
+
+**主要接口**：
+- `POST /api/analytics/track` - 单个事件上报
+- `POST /api/analytics/track/batch` - 批量事件上报
+- `GET /healthz` - 健康检查（直接访问，不经过 /api/analytics 前缀）
+
+**前端调用示例**：
+```javascript
+// 单个埋点事件
+const trackEvent = async (eventData) => {
+  try {
+    const response = await fetch('https://your-domain.com/api/analytics/track', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        version: 'v1',
+        eventName: 'page_view',
+        eventId: crypto.randomUUID(), // 生成 UUID v4
+        rid: crypto.randomUUID(),
+        timestamp: new Date().toISOString(),
+        sessionId: getSessionId(), // 你的会话ID
+        language: 'zh',
+        routeFrom: '/',
+        routeTo: '/about'
+      })
+    });
+    
+    // 埋点接口返回 204 No Content
+    if (response.status === 204) {
+      console.log('埋点上报成功');
+    }
+  } catch (error) {
+    console.error('埋点上报失败:', error);
+  }
+};
+
+// 批量埋点事件
+const trackBatch = async (events) => {
+  const response = await fetch('https://your-domain.com/api/analytics/track/batch', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      version: 'v1',
+      events: events // 事件数组
+    })
+  });
+};
+```
+
+### 3. 前端集成完整示例
+
+创建 API 工具类：
+```javascript
+// api.js
+class APIClient {
+  constructor(baseURL) {
+    this.baseURL = baseURL;
+  }
+
+  // 业务接口调用
+  async submitHiring(data) {
+    return this.post('/api/hiring', data);
+  }
+
+  async submitEmployerBranding(data) {
+    return this.post('/api/employer-branding', data);
+  }
+
+  // 埋点接口调用
+  async trackEvent(eventData) {
+    const response = await fetch(`${this.baseURL}/api/analytics/track`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        version: 'v1',
+        eventId: crypto.randomUUID(),
+        rid: crypto.randomUUID(),
+        timestamp: new Date().toISOString(),
+        ...eventData
+      })
+    });
+    return response.status === 204;
+  }
+
+  // 通用 POST 方法
+  async post(endpoint, data) {
+    const response = await fetch(`${this.baseURL}${endpoint}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    return response.json();
+  }
+}
+
+// 使用示例
+const api = new APIClient('https://your-domain.com');
+
+// 提交表单
+const result = await api.submitHiring({
+  name: '张三',
+  email: 'zhang@example.com',
+  // ... 其他字段
+});
+
+// 埋点上报
+await api.trackEvent({
+  eventName: 'form_submit',
+  eventProps: { form_type: 'hiring' }
+});
+```
+
+### 4. CORS 配置说明
+
+**Node.js 服务 CORS**：
+已配置允许的域名，支持跨域请求。
+
+**Python 服务 CORS**：
+需要在 `/etc/analytics-ingest.env` 中正确配置：
+```env
+# 将 <YOUR_DOMAIN> 替换为实际域名
+ALLOWED_ORIGINS=["https://your-domain.com", "https://www.your-domain.com"]
+```
+
+### 5. 域名配置建议
+
+**如果有域名**：
+1. 配置 DNS 解析指向 `115.190.117.78`
+2. 使用 Let's Encrypt 配置 SSL 证书
+3. 前端使用 `https://your-domain.com` 调用
+
+**如果暂无域名**：
+1. 直接使用 IP：`http://115.190.117.78`
+2. 注意浏览器可能有跨域限制
+3. 建议尽快配置域名和 HTTPS
+
+### 6. 接口调试和测试
+
+```bash
+# 测试业务接口
+curl -X POST https://your-domain.com/api/hiring \
+  -H "Content-Type: application/json" \
+  -d '{"name":"测试","email":"test@example.com"}'
+
+# 测试埋点接口  
+curl -X POST https://your-domain.com/api/analytics/track \
+  -H "Content-Type: application/json" \
+  -d '{"version":"v1","eventName":"test","eventId":"'$(uuidgen | tr '[:upper:]' '[:lower:]')'","timestamp":"'$(date -Iseconds)'"}'
+
+# 测试健康检查
+curl https://your-domain.com/healthz
+```
