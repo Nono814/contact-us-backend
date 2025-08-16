@@ -4,18 +4,104 @@
 
 **重要**：本服务使用 8081 端口，避免与主业务 Node.js 服务（8080 端口）冲突。
 
-## 第1步：准备代码和环境
+## 第1步：代码部署到云服务器
+
+### 方案一：rsync 同步（推荐，适用于密码登录）
+
+**前提条件**：
+- 云服务器 IP：115.190.117.78
+- SSH 端口：22
+- 登录密码：Aiedn531
+- SSH 用户：将 `<user>` 替换为实际用户名（如 root、ubuntu）
+
+**1) 本地安装依赖工具**
+```bash
+sudo apt install -y sshpass rsync
+```
+
+**2) 同步代码到云服务器**
+```bash
+# 预演（确认要传输的文件）
+SSHPASS='Aiedn531' sshpass -e rsync -avz --dry-run --delete \
+  --exclude ".git" --exclude "node_modules" --exclude "logs" --exclude "*.log" \
+  --exclude "config.env" --exclude "config.production.env" --exclude ".vscode" --exclude ".env*" \
+  --exclude "__pycache__" --exclude ".venv" --exclude "lib/" \
+  -e "ssh -p 22 -o StrictHostKeyChecking=no" \
+  /home/devbox/project/ <user>@115.190.117.78:/tmp/project-sync/
+
+# 实际同步
+SSHPASS='Aiedn531' sshpass -e rsync -avz --delete \
+  --exclude ".git" --exclude "node_modules" --exclude "logs" --exclude "*.log" \
+  --exclude "config.env" --exclude "config.production.env" --exclude ".vscode" --exclude ".env*" \
+  --exclude "__pycache__" --exclude ".venv" --exclude "lib/" \
+  -e "ssh -p 22 -o StrictHostKeyChecking=no" \
+  /home/devbox/project/ <user>@115.190.117.78:/tmp/project-sync/
+```
+
+### 方案二：Git 同步（推荐，适用于有 Git 权限）
+
+**1) 本地推送到远程仓库**
+```bash
+# 如果 Git SSH 有问题，先配置 SSH key
+ssh-keygen -t ed25519 -C "your@email.com" -f ~/.ssh/id_ed25519 -N ""
+eval "$(ssh-agent -s)" && ssh-add ~/.ssh/id_ed25519
+cat ~/.ssh/id_ed25519.pub  # 复制输出，添加到 GitHub SSH Keys
+
+# 测试连接并推送
+ssh -T git@github.com
+git push origin main
+```
+
+**2) 服务器上克隆代码**
+```bash
+# 在云服务器上执行
+sudo mkdir -p /tmp/project-sync
+sudo chown -R $USER:$USER /tmp/project-sync
+cd /tmp/project-sync
+git clone https://github.com/Nono814/contact-us-backend.git .
+```
+
+### 方案三：打包传输
+
+**1) 本地打包**
+```bash
+cd /home/devbox/project
+tar --exclude=".git" --exclude="node_modules" --exclude="logs" --exclude="*.log" \
+    --exclude="config.env" --exclude="config.production.env" --exclude=".vscode" \
+    --exclude="__pycache__" --exclude=".venv" --exclude="lib/" \
+    -czf officialwebbackend-$(date +%Y%m%d-%H%M).tar.gz .
+```
+
+**2) 传输并解压**
+```bash
+# 传输
+SSHPASS='Aiedn531' sshpass -e scp -P 22 -o StrictHostKeyChecking=no \
+  officialwebbackend-*.tar.gz <user>@115.190.117.78:/tmp/
+
+# 在服务器解压
+sudo mkdir -p /tmp/project-sync
+sudo chown -R $USER:$USER /tmp/project-sync
+cd /tmp/project-sync
+tar -xzf /tmp/officialwebbackend-*.tar.gz
+```
+
+## 第2步：准备代码和环境
+
+**在云服务器上执行以下命令：**
+
 - 创建系统用户与部署目录
 ```bash
 sudo useradd -r -s /bin/false analytics || true
 sudo mkdir -p /opt/analytics-ingest
 sudo chown -R $USER:$USER /opt/analytics-ingest
 ```
-- 放置代码到指定目录（将当前项目拷贝/同步到部署目录）
+
+- 复制代码到部署目录
 ```bash
-# 示例
-rsync -av --delete /home/devbox/project/ /opt/analytics-ingest/
+# 从临时同步目录复制到最终部署目录
+rsync -av --delete /tmp/project-sync/ /opt/analytics-ingest/
 ```
+
 - 创建 Python 虚拟环境并安装依赖（Python 3.11+）
 ```bash
 cd /opt/analytics-ingest
@@ -24,7 +110,7 @@ python3 -m venv .venv
 pip install -r requirements.txt
 ```
 
-## 第2步：创建环境变量文件
+## 第3步：创建环境变量文件
 - 新建并编辑 `/etc/analytics-ingest.env`
 ```bash
 sudo tee /etc/analytics-ingest.env >/dev/null <<'EOF'
@@ -47,7 +133,7 @@ MAX_REQUEST_BYTES=204800
 EOF
 ```
 
-## 第3步：创建 systemd 服务
+## 第4步：创建 systemd 服务
 - 新建 `/etc/systemd/system/analytics-ingest.service`
 ```ini
 [Unit]
@@ -76,7 +162,7 @@ systemctl status analytics-ingest
 curl -s http://127.0.0.1:8081/healthz  # 预期 {"status":"ok"}
 ```
 
-## 第4步：配置 Nginx 同源代理
+## 第5步：配置 Nginx 同源代理
 - 在官网域名对应的 `server {}` 中增加（或更新）：
 ```nginx
 # 同源代理：外部 /api/analytics/* -> 本机服务 127.0.0.1:8081
@@ -106,7 +192,7 @@ location ^~ /api/analytics/ {
 sudo nginx -t && sudo nginx -s reload
 ```
 
-## 第5步：最终验证
+## 第6步：最终验证
 - 外网同源验证（替换为你们官网域名）
 ```bash
 curl -i -X POST https://<YOUR_DOMAIN>/api/analytics/track \
@@ -124,7 +210,7 @@ curl -i -X POST https://<YOUR_DOMAIN>/api/analytics/track/batch \
 # 预期：204 No Content
 ```
 
-## 第6步：日常运维
+## 第7步：日常运维
 - 查看/跟随日志
 ```bash
 journalctl -u analytics-ingest -f
@@ -135,8 +221,23 @@ sudo systemctl restart analytics-ingest
 ```
 - 升级上线（拉新代码并装依赖）
 ```bash
+# 方案一：使用 rsync 更新
+SSHPASS='Aiedn531' sshpass -e rsync -avz --delete \
+  --exclude ".git" --exclude "node_modules" --exclude "logs" --exclude "*.log" \
+  --exclude "config.env" --exclude "config.production.env" --exclude ".vscode" --exclude ".env*" \
+  --exclude "__pycache__" --exclude ".venv" --exclude "lib/" \
+  -e "ssh -p 22 -o StrictHostKeyChecking=no" \
+  /home/devbox/project/ <user>@115.190.117.78:/tmp/project-sync/
+
+# 在服务器上更新部署
+rsync -av --delete /tmp/project-sync/ /opt/analytics-ingest/
 cd /opt/analytics-ingest
-# 同步/拉取代码（如 git pull 或 rsync）
+. ./.venv/bin/activate && pip install -r requirements.txt
+sudo systemctl restart analytics-ingest
+
+# 方案二：使用 Git 更新（如果已配置 Git）
+cd /opt/analytics-ingest
+git pull --rebase
 . ./.venv/bin/activate && pip install -r requirements.txt
 sudo systemctl restart analytics-ingest
 ```
