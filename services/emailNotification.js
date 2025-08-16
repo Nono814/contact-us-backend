@@ -7,19 +7,13 @@ const EMAIL_CONFIG = {
   
   // 发送邮箱配置（支持多种SMTP服务器）
   smtp: {
-    host: process.env.SMTP_HOST || 'smtp.gmail.com', // 默认使用Gmail SMTP，支持自定义域名
-    port: parseInt(process.env.SMTP_PORT) || 587,
-    secure: process.env.SMTP_SECURE === 'true' || false, // STARTTLS
+    host: process.env.SMTP_HOST || 'smtp.163.com', // 默认使用163 SMTP
+    port: parseInt(process.env.SMTP_PORT) || 465,
+    secure: process.env.SMTP_SECURE === 'true' || true, // SSL
     auth: {
-      user: process.env.SMTP_USER || 'contact@daboss.ai', // 发送邮箱
-      pass: process.env.SMTP_PASS || 'your_smtp_password'   // 邮箱密码或应用专用密码
-    },
-    // 连接池配置，提高稳定性
-    pool: true,
-    maxConnections: 1, // 163邮箱限制并发连接数
-    maxMessages: 10,   // 每个连接最多发送10封邮件
-    rateDelta: 1000,   // 1秒
-    rateLimit: 2       // 每秒最多2封邮件
+      user: process.env.SMTP_USER || '18264190169@163.com', // 发送邮箱
+      pass: process.env.SMTP_PASS || 'XUnRzEm8M89jcfQe'   // 邮箱密码或应用专用密码
+    }
   }
 };
 
@@ -38,14 +32,14 @@ async function verifyEmailConfig() {
     console.error('❌ 邮件服务配置验证失败:', error.message);
     console.error('🔍 详细错误信息:', error);
     
-    // 针对Office 365认证失败提供具体建议
+    // 针对163邮箱认证失败提供具体建议
     if (error.message.includes('535') || error.message.includes('Authentication unsuccessful')) {
       console.error('');
       console.error('🚨 邮件认证失败解决建议:');
-      console.error('1. 检查 contact@daboss.ai 是否启用了多重身份验证(MFA)');
-      console.error('2. 如果启用了MFA，需要生成应用专用密码替换当前的SMTP_PASS');
-      console.error('3. 登录 https://portal.office.com -> 安全信息 -> 应用密码 -> 新建应用密码');
-      console.error('4. 将生成的应用密码更新到环境变量 SMTP_PASS 中');
+      console.error('1. 检查163邮箱是否启用了SMTP服务');
+      console.error('2. 确保使用的是163邮箱的授权码，而非登录密码');
+      console.error('3. 登录163邮箱 -> 设置 -> POP3/SMTP/IMAP -> 开启SMTP服务并获取授权码');
+      console.error('4. 将授权码更新到环境变量 SMTP_PASS 中');
       console.error('');
     }
     
@@ -217,29 +211,13 @@ async function sendNotification(service, data, submissionId) {
       `
     };
 
-    // 重试发送邮件（最多3次）
-    let lastError;
-    for (let attempt = 1; attempt <= 3; attempt++) {
-      try {
-        const result = await transporter.sendMail(mailOptions);
-        console.log(`✅ 邮件通知发送成功 - ${serviceName} - ID: ${submissionId} (尝试 ${attempt}/3)`);
-        return { success: true, messageId: result.messageId };
-      } catch (error) {
-        lastError = error;
-        console.log(`⚠️ 邮件发送尝试 ${attempt}/3 失败:`, error.message);
-        
-        if (attempt < 3) {
-          // 等待后重试
-          await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
-        }
-      }
-    }
-    
-    console.error('❌ 邮件发送最终失败:', lastError);
-    return { success: false, error: lastError.message };
+    const result = await transporter.sendMail(mailOptions);
+    console.log(`✅ 邮件通知发送成功 - ${serviceName} - ID: ${submissionId}`);
+    return { success: true, messageId: result.messageId };
     
   } catch (error) {
-    console.error('❌ 邮件发送异常:', error);
+    console.error('❌ 邮件发送失败:', error);
+    // 邮件发送失败不应该影响主流程，只记录错误
     return { success: false, error: error.message };
   }
 }
@@ -374,29 +352,12 @@ async function sendDemoBookingNotification(bookingData) {
       text: textContent
     };
 
-    // 重试发送邮件（最多3次）
-    let lastError;
-    for (let attempt = 1; attempt <= 3; attempt++) {
-      try {
-        const result = await transporter.sendMail(mailOptions);
-        console.log(`✅ Demo预约邮件通知发送成功 - ID: ${bookingId} (尝试 ${attempt}/3)`);
-        return { success: true, messageId: result.messageId };
-      } catch (error) {
-        lastError = error;
-        console.log(`⚠️ Demo预约邮件发送尝试 ${attempt}/3 失败:`, error.message);
-        
-        if (attempt < 3) {
-          // 等待后重试
-          await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
-        }
-      }
-    }
-    
-    console.error('❌ Demo预约邮件发送最终失败:', lastError);
-    return { success: false, error: lastError.message };
+    const result = await transporter.sendMail(mailOptions);
+    console.log(`✅ Demo预约邮件通知发送成功 - ID: ${bookingId}`);
+    return { success: true, messageId: result.messageId };
     
   } catch (error) {
-    console.error('❌ Demo预约邮件发送异常:', error);
+    console.error('❌ Demo预约邮件发送失败:', error);
     return { success: false, error: error.message };
   }
 }

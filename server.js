@@ -38,9 +38,33 @@ const limiter = rateLimit({
   message: {
     error: '请求过于频繁，请稍后再试'
   },
-  // 简化代理配置，使用标准设置
-  standardHeaders: true,
-  legacyHeaders: false
+  // 精确配置trust proxy，只信任来自Nginx的请求
+  trustProxy: (ip) => {
+    // 信任本地回环地址和私有网络地址（Nginx通常在同一网络）
+    return ip === '127.0.0.1' || ip === '::1' || 
+           ip.startsWith('10.') || 
+           ip.startsWith('172.16.') || 
+           ip.startsWith('192.168.') ||
+           ip.startsWith('::ffff:127.0.0.1');
+  },
+  // 使用自定义键生成器获取真实IP
+  keyGenerator: (req) => {
+    // 从Nginx转发的头部获取真实IP
+    const forwarded = req.headers['x-forwarded-for'];
+    const realIp = req.headers['x-real-ip'];
+    
+    if (forwarded) {
+      // X-Forwarded-For 可能包含多个IP，取第一个
+      return forwarded.split(',')[0].trim();
+    }
+    
+    if (realIp) {
+      return realIp.trim();
+    }
+    
+    // 降级到连接IP
+    return req.connection.remoteAddress || req.socket.remoteAddress || req.ip;
+  }
 });
 app.use('/api/', limiter);
 
