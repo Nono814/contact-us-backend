@@ -125,7 +125,7 @@ DB_PASSWORD=qrzk4ts4
 DB_NAME=analytics
 
 # CORS 同源放行（按需填写你们的官网域名）
-ALLOWED_ORIGINS=["https://<YOUR_DOMAIN>"]
+ALLOWED_ORIGINS=["https://daboss.net.cn", "https://www.daboss.net.cn"]
 
 # 接收限制（可保持默认）
 MAX_BATCH_EVENTS=50
@@ -193,9 +193,9 @@ sudo nginx -t && sudo nginx -s reload
 ```
 
 ## 第6步：最终验证
-- 外网同源验证（替换为你们官网域名）
+- 外网同源验证
 ```bash
-curl -i -X POST https://<YOUR_DOMAIN>/api/analytics/track \
+curl -i -X POST https://daboss.net.cn/api/analytics/track \
   -H "Content-Type: application/json" \
   -d '{"version":"v1","eventName":"page_view","eventId":"c1c3c0c1-1e2f-4b5a-9ac1-0000000000aa","rid":"2f7a6c10-5b0c-4b7e-8b7e-0000000000aa","timestamp":"2025-08-11T09:00:00.000Z"}'
 # 预期：204 No Content；响应头含 X-Request-Id
@@ -204,7 +204,7 @@ curl -i -X POST https://<YOUR_DOMAIN>/api/analytics/track \
 ```bash
 SID=$(python -c 'import uuid;print(uuid.uuid4())'); E1=$(python -c 'import uuid;print(uuid.uuid4())'); E2=$(python -c 'import uuid;print(uuid.uuid4())'); RID1=$(python -c 'import uuid;print(uuid.uuid4())'); RID2=$(python -c 'import uuid;print(uuid.uuid4())')
 
-curl -i -X POST https://<YOUR_DOMAIN>/api/analytics/track/batch \
+curl -i -X POST https://daboss.net.cn/api/analytics/track/batch \
   -H 'Content-Type: application/json' \
   -d "{\"version\":\"v1\",\"events\":[{\"eventName\":\"session_start\",\"eventId\":\"$E1\",\"timestamp\":\"2025-08-11T16:58:00.000Z\",\"sessionId\":\"$SID\",\"rid\":\"$RID1\",\"language\":\"zh\"},{\"eventName\":\"page_view\",\"eventId\":\"$E2\",\"timestamp\":\"2025-08-11T16:58:01.000Z\",\"sessionId\":\"$SID\",\"rid\":\"$RID2\",\"routeFrom\":\"/\",\"routeTo\":\"/candidates\",\"language\":\"zh\"}]}"
 # 预期：204 No Content
@@ -247,7 +247,7 @@ sudo systemctl restart analytics-ingest
   - 两服务可独立部署和重启，互不影响
 - 切换域名
   - 更新 Nginx 的 `server_name` 和证书为新域名
-  - 更新 `/etc/analytics-ingest.env` 中 `ALLOWED_ORIGINS=["https://new-domain.com"]`
+  - 更新 `/etc/analytics-ingest.env` 中 `ALLOWED_ORIGINS=["https://daboss.net.cn", "https://www.daboss.net.cn"]`
   - `sudo systemctl restart analytics-ingest && sudo nginx -s reload`
 - 常见问题速查
   - 404：Nginx 路由未生效或未 reload；或服务未启动
@@ -271,8 +271,8 @@ sudo systemctl restart analytics-ingest
 
 **接口地址格式**：
 ```
-https://your-domain.com/api/{endpoint}
-或 http://115.190.117.78/api/{endpoint}  (无域名时)
+https://daboss.net.cn/api/{endpoint}
+或 http://115.190.117.78/api/{endpoint}  (备用IP访问)
 ```
 
 **主要接口**：
@@ -286,7 +286,7 @@ https://your-domain.com/api/{endpoint}
 **前端调用示例**：
 ```javascript
 // 招聘服务提交
-const response = await fetch('https://your-domain.com/api/hiring', {
+const response = await fetch('https://daboss.net.cn/api/hiring', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -309,7 +309,7 @@ console.log(result); // { success: true, message: "提交成功" }
 
 **接口地址格式**：
 ```
-https://your-domain.com/api/analytics/{endpoint}
+https://daboss.net.cn/api/analytics/{endpoint}
 ```
 
 **主要接口**：
@@ -322,7 +322,7 @@ https://your-domain.com/api/analytics/{endpoint}
 // 单个埋点事件
 const trackEvent = async (eventData) => {
   try {
-    const response = await fetch('https://your-domain.com/api/analytics/track', {
+    const response = await fetch('https://daboss.net.cn/api/analytics/track', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -351,7 +351,7 @@ const trackEvent = async (eventData) => {
 
 // 批量埋点事件
 const trackBatch = async (events) => {
-  const response = await fetch('https://your-domain.com/api/analytics/track/batch', {
+  const response = await fetch('https://daboss.net.cn/api/analytics/track/batch', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -411,7 +411,7 @@ class APIClient {
 }
 
 // 使用示例
-const api = new APIClient('https://your-domain.com');
+const api = new APIClient('https://daboss.net.cn');
 
 // 提交表单
 const result = await api.submitHiring({
@@ -435,35 +435,38 @@ await api.trackEvent({
 **Python 服务 CORS**：
 需要在 `/etc/analytics-ingest.env` 中正确配置：
 ```env
-# 将 <YOUR_DOMAIN> 替换为实际域名
-ALLOWED_ORIGINS=["https://your-domain.com", "https://www.your-domain.com"]
+# 已配置 daboss.net.cn 域名
+ALLOWED_ORIGINS=["https://daboss.net.cn", "https://www.daboss.net.cn"]
 ```
 
 ### 5. 域名配置建议
 
-**如果有域名**：
+**当前域名配置 (daboss.net.cn)**：
 1. 配置 DNS 解析指向 `115.190.117.78`
-2. 使用 Let's Encrypt 配置 SSL 证书
-3. 前端使用 `https://your-domain.com` 调用
+2. 使用 Let's Encrypt 配置 SSL 证书：
+   ```bash
+   sudo certbot --nginx -d daboss.net.cn -d www.daboss.net.cn
+   ```
+3. 前端使用 `https://daboss.net.cn` 调用
 
-**如果暂无域名**：
+**备用 IP 访问**：
 1. 直接使用 IP：`http://115.190.117.78`
 2. 注意浏览器可能有跨域限制
-3. 建议尽快配置域名和 HTTPS
+3. 仅用于调试或应急访问
 
 ### 6. 接口调试和测试
 
 ```bash
 # 测试业务接口
-curl -X POST https://your-domain.com/api/hiring \
+curl -X POST https://daboss.net.cn/api/hiring \
   -H "Content-Type: application/json" \
   -d '{"name":"测试","email":"test@example.com"}'
 
 # 测试埋点接口  
-curl -X POST https://your-domain.com/api/analytics/track \
+curl -X POST https://daboss.net.cn/api/analytics/track \
   -H "Content-Type: application/json" \
   -d '{"version":"v1","eventName":"test","eventId":"'$(uuidgen | tr '[:upper:]' '[:lower:]')'","timestamp":"'$(date -Iseconds)'"}'
 
 # 测试健康检查
-curl https://your-domain.com/healthz
+curl https://daboss.net.cn/healthz
 ```
