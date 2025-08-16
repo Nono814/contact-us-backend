@@ -13,7 +13,13 @@ const EMAIL_CONFIG = {
     auth: {
       user: process.env.SMTP_USER || 'contact@daboss.ai', // 发送邮箱
       pass: process.env.SMTP_PASS || 'your_smtp_password'   // 邮箱密码或应用专用密码
-    }
+    },
+    // 连接池配置，提高稳定性
+    pool: true,
+    maxConnections: 1, // 163邮箱限制并发连接数
+    maxMessages: 10,   // 每个连接最多发送10封邮件
+    rateDelta: 1000,   // 1秒
+    rateLimit: 2       // 每秒最多2封邮件
   }
 };
 
@@ -211,13 +217,29 @@ async function sendNotification(service, data, submissionId) {
       `
     };
 
-    const result = await transporter.sendMail(mailOptions);
-    console.log(`✅ 邮件通知发送成功 - ${serviceName} - ID: ${submissionId}`);
-    return { success: true, messageId: result.messageId };
+    // 重试发送邮件（最多3次）
+    let lastError;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const result = await transporter.sendMail(mailOptions);
+        console.log(`✅ 邮件通知发送成功 - ${serviceName} - ID: ${submissionId} (尝试 ${attempt}/3)`);
+        return { success: true, messageId: result.messageId };
+      } catch (error) {
+        lastError = error;
+        console.log(`⚠️ 邮件发送尝试 ${attempt}/3 失败:`, error.message);
+        
+        if (attempt < 3) {
+          // 等待后重试
+          await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+        }
+      }
+    }
+    
+    console.error('❌ 邮件发送最终失败:', lastError);
+    return { success: false, error: lastError.message };
     
   } catch (error) {
-    console.error('❌ 邮件发送失败:', error);
-    // 邮件发送失败不应该影响主流程，只记录错误
+    console.error('❌ 邮件发送异常:', error);
     return { success: false, error: error.message };
   }
 }
@@ -352,12 +374,29 @@ async function sendDemoBookingNotification(bookingData) {
       text: textContent
     };
 
-    const result = await transporter.sendMail(mailOptions);
-    console.log(`✅ Demo预约邮件通知发送成功 - ID: ${bookingId}`);
-    return { success: true, messageId: result.messageId };
+    // 重试发送邮件（最多3次）
+    let lastError;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const result = await transporter.sendMail(mailOptions);
+        console.log(`✅ Demo预约邮件通知发送成功 - ID: ${bookingId} (尝试 ${attempt}/3)`);
+        return { success: true, messageId: result.messageId };
+      } catch (error) {
+        lastError = error;
+        console.log(`⚠️ Demo预约邮件发送尝试 ${attempt}/3 失败:`, error.message);
+        
+        if (attempt < 3) {
+          // 等待后重试
+          await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+        }
+      }
+    }
+    
+    console.error('❌ Demo预约邮件发送最终失败:', lastError);
+    return { success: false, error: lastError.message };
     
   } catch (error) {
-    console.error('❌ Demo预约邮件发送失败:', error);
+    console.error('❌ Demo预约邮件发送异常:', error);
     return { success: false, error: error.message };
   }
 }
