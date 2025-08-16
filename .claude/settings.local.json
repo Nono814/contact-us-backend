@@ -25,7 +25,8 @@
       "Bash(git add:*)",
       "Bash(cp:*)",
       "Bash(tar:*)",
-      "Bash(zip:*)"
+      "Bash(zip:*)",
+      "Bash(pm2 restart:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

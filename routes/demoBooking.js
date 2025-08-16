@@ -13,10 +13,33 @@ const demoBookingLimiter = rateLimit({
     message: 'Too many demo booking requests, please try again later',
     error_code: 'RATE_LIMIT_EXCEEDED'
   },
+  // 精确配置trust proxy，只信任来自Nginx的请求
+  trustProxy: (ip) => {
+    // 信任本地回环地址和私有网络地址（Nginx通常在同一网络）
+    return ip === '127.0.0.1' || ip === '::1' || 
+           ip.startsWith('10.') || 
+           ip.startsWith('172.16.') || 
+           ip.startsWith('192.168.') ||
+           ip.startsWith('::ffff:127.0.0.1');
+  },
   keyGenerator: (req) => {
     // 获取真实IP地址，考虑代理情况
-    const ip = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.connection.remoteAddress || req.socket.remoteAddress || req.ip || 'unknown';
-    const clientIp = Array.isArray(ip) ? ip[0] : ip.split(',')[0].trim();
+    const forwarded = req.headers['x-forwarded-for'];
+    const realIp = req.headers['x-real-ip'];
+    
+    let clientIp = 'unknown';
+    
+    if (forwarded) {
+      // X-Forwarded-For 可能包含多个IP，取第一个
+      clientIp = forwarded.split(',')[0].trim();
+    } else if (realIp) {
+      clientIp = realIp.trim();
+    } else {
+      // 降级到连接IP
+      clientIp = req.connection.remoteAddress || req.socket.remoteAddress || req.ip || 'unknown';
+    }
+    
+    // 结合IP和邮箱作为限制键，防止同一用户多次提交
     return clientIp + '_' + (req.body.email || 'no-email');
   }
 });

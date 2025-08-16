@@ -24,10 +24,25 @@ const transporter = nodemailer.createTransport(EMAIL_CONFIG.smtp);
 async function verifyEmailConfig() {
   try {
     await transporter.verify();
-    console.log('邮件服务配置验证成功');
+    console.log('✅ 邮件服务配置验证成功');
+    console.log(`📧 SMTP配置: ${EMAIL_CONFIG.smtp.host}:${EMAIL_CONFIG.smtp.port}`);
+    console.log(`👤 发送账户: ${EMAIL_CONFIG.smtp.auth.user}`);
     return true;
   } catch (error) {
-    console.error('邮件服务配置验证失败:', error.message);
+    console.error('❌ 邮件服务配置验证失败:', error.message);
+    console.error('🔍 详细错误信息:', error);
+    
+    // 针对Office 365认证失败提供具体建议
+    if (error.message.includes('535') || error.message.includes('Authentication unsuccessful')) {
+      console.error('');
+      console.error('🚨 邮件认证失败解决建议:');
+      console.error('1. 检查 contact@daboss.ai 是否启用了多重身份验证(MFA)');
+      console.error('2. 如果启用了MFA，需要生成应用专用密码替换当前的SMTP_PASS');
+      console.error('3. 登录 https://portal.office.com -> 安全信息 -> 应用密码 -> 新建应用密码');
+      console.error('4. 将生成的应用密码更新到环境变量 SMTP_PASS 中');
+      console.error('');
+    }
+    
     return false;
   }
 }
