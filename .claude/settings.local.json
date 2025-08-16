@@ -26,7 +26,8 @@
       "Bash(cp:*)",
       "Bash(tar:*)",
       "Bash(zip:*)",
-      "Bash(pm2 restart:*)"
+      "Bash(pm2 restart:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"
