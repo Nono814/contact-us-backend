@@ -2,10 +2,10 @@ const mysql = require('mysql2/promise');
 
 // 数据库连接配置（不指定数据库，用于创建数据库）
 const baseConfig = {
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
+  host: process.env.DB_HOST || 'localhost',
+  port: parseInt(process.env.DB_PORT) || 3306,
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || '',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
@@ -14,7 +14,7 @@ const baseConfig = {
 // 数据库连接配置（指定数据库）
 const dbConfig = {
   ...baseConfig,
-  database: process.env.DB_NAME
+  database: process.env.DB_NAME || 'get_in_touch'
 };
 
 // 创建连接池
@@ -28,8 +28,9 @@ async function initDatabase() {
     
     try {
       // 尝试创建数据库（如果不存在）
-      await basePool.execute(`CREATE DATABASE IF NOT EXISTS \`${process.env.DB_NAME}\``);
-      console.log(`数据库 ${process.env.DB_NAME} 创建成功或已存在`);
+      const dbName = process.env.DB_NAME || 'get_in_touch';
+      await basePool.execute(`CREATE DATABASE IF NOT EXISTS \`${dbName}\``);
+      console.log(`数据库 ${dbName} 创建成功或已存在`);
     } catch (dbError) {
       console.error('创建数据库失败:', dbError);
     } finally {

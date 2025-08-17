@@ -219,11 +219,11 @@ router.post('/demo-booking', demoBookingLimiter, async (req, res) => {
 
     // 获取数据库连接
     connection = await mysql.createConnection({
-      host: process.env.DB_HOST,
-      port: process.env.DB_PORT || 3306,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
+      host: process.env.DB_HOST || 'localhost',
+      port: parseInt(process.env.DB_PORT) || 3306,
+      user: process.env.DB_USER || 'root',
+      password: process.env.DB_PASSWORD || '',
+      database: process.env.DB_NAME || 'get_in_touch',
       ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false
     });
 

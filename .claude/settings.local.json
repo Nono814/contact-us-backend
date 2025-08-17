@@ -27,7 +27,10 @@
       "Bash(tar:*)",
       "Bash(zip:*)",
       "Bash(pm2 restart:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(pm2 logs:*)",
+      "Bash(env)",
+      "Bash(git restore:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"
