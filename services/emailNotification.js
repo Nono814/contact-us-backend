@@ -230,6 +230,7 @@ async function sendDemoBookingNotification(bookingData) {
       firstName,
       lastName,
       email,
+      phone,
       company,
       roles,
       mainGoal,
@@ -258,6 +259,8 @@ async function sendDemoBookingNotification(bookingData) {
     const emailUpdatesText = language === 'zh' ? emailUpdatesLabel.label_zh : emailUpdatesLabel.label_en;
 
     const subject = `[Demo预约] ${escapeHtml(company)} - ${escapeHtml(firstName)} ${escapeHtml(lastName)}`;
+    const phoneText = (phone && String(phone).trim()) ? String(phone).trim() : (language === 'zh' ? '无' : 'none');
+    console.log(`[Email] Demo booking phone: ${phoneText}`);
     
     const htmlContent = `
       <!DOCTYPE html>
@@ -294,6 +297,7 @@ async function sendDemoBookingNotification(bookingData) {
                   <table class="details-table">
                       <tr><td>姓名:</td><td>${escapeHtml(firstName)} ${escapeHtml(lastName)}</td></tr>
                       <tr><td>邮箱:</td><td>${escapeHtml(email)}</td></tr>
+                      <tr><td>手机号:</td><td>${escapeHtml(phoneText)}</td></tr>
                       <tr><td>公司:</td><td>${escapeHtml(company)}</td></tr>
                   </table>
                   
@@ -330,6 +334,7 @@ async function sendDemoBookingNotification(bookingData) {
 基本信息：
 - 姓名：${firstName} ${lastName}
 - 邮箱：${email}
+- 手机号：${phoneText}
 - 公司：${company}
 
 详细信息：

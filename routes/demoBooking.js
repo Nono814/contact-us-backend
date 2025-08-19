@@ -126,6 +126,15 @@ function validateDemoBooking(data) {
     errors.email = 'Invalid email format';
   }
 
+  // 手机号验证（可选字段）
+  if (data.phone) {
+    if (typeof data.phone !== 'string') {
+      errors.phone = 'Phone must be a string';
+    } else if (data.phone.length > 20) {
+      errors.phone = 'Phone must be 20 characters or less';
+    }
+  }
+
   if (!data.company || typeof data.company !== 'string' || data.company.trim().length === 0) {
     errors.company = 'Company name is required';
   } else if (data.company.length > 100) {
@@ -205,6 +214,7 @@ router.post('/demo-booking', demoBookingLimiter, async (req, res) => {
       firstName,
       lastName,
       email,
+      phone,
       company,
       roles,
       mainGoal,
@@ -223,7 +233,7 @@ router.post('/demo-booking', demoBookingLimiter, async (req, res) => {
       port: parseInt(process.env.DB_PORT) || 3306,
       user: process.env.DB_USER || 'root',
       password: process.env.DB_PASSWORD || '',
-      database: process.env.DB_NAME || 'get_in_touch',
+      database: process.env.DEMO_BOOKING_DB_NAME || process.env.DB_NAME || 'demo-booking',
       ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false
     });
 
@@ -245,12 +255,13 @@ router.post('/demo-booking', demoBookingLimiter, async (req, res) => {
     // 插入数据库 - 适配实际表结构
     const [result] = await connection.execute(
       `INSERT INTO demo_bookings 
-       (first_name, last_name, email, company, roles, main_goal, budget, email_updates, language, user_ip, user_agent) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       (first_name, last_name, email, phone, company, roles, main_goal, budget, email_updates, language, user_ip, user_agent) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         firstName.trim(),
         lastName.trim(),
         email.trim().toLowerCase(),
+        phone ? phone.trim() : null,
         company.trim(),
         JSON.stringify(roles),
         mainGoal,
@@ -275,6 +286,7 @@ router.post('/demo-booking', demoBookingLimiter, async (req, res) => {
           firstName,
           lastName,
           email,
+          phone,
           company,
           roles,
           mainGoal,
@@ -304,6 +316,115 @@ router.post('/demo-booking', demoBookingLimiter, async (req, res) => {
   } catch (error) {
     const processingTime = Date.now() - startTime;
     console.error(`[${requestId}] Demo booking error (${processingTime}ms):`, {
+      message: error.message,
+      stack: error.stack,
+      sql: error.sql
+    });
+
+    const errorId = `err_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 8)}`;
+    
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error_id: errorId
+    });
+  } finally {
+    if (connection) {
+      try {
+        await connection.end();
+      } catch (closeError) {
+        console.error(`[${requestId}] Error closing database connection:`, closeError);
+      }
+    }
+  }
+});
+
+// 查询Demo预约接口
+router.get('/demo-booking', async (req, res) => {
+  const startTime = Date.now();
+  const requestId = Math.random().toString(36).substring(2, 15);
+  
+  console.log(`[${requestId}] Demo booking query request started`);
+
+  let connection = null;
+  
+  try {
+    // 获取查询参数
+    const { id, email, limit = 10, offset = 0 } = req.query;
+    
+    // 构建查询条件
+    let whereClause = '';
+    let queryParams = [];
+    
+    if (id) {
+      whereClause = 'WHERE id = ?';
+      queryParams.push(id);
+    } else if (email) {
+      whereClause = 'WHERE email = ?';
+      queryParams.push(email.trim().toLowerCase());
+    }
+    
+    // 获取数据库连接
+    connection = await mysql.createConnection({
+      host: process.env.DB_HOST || 'localhost',
+      port: parseInt(process.env.DB_PORT) || 3306,
+      user: process.env.DB_USER || 'root',
+      password: process.env.DB_PASSWORD || '',
+      database: process.env.DEMO_BOOKING_DB_NAME || process.env.DB_NAME || 'demo-booking',
+      ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false
+    });
+
+    // 查询数据（部分数据库对 LIMIT/OFFSET 的占位符支持存在差异，这里内联安全的数字以避免 500 错误）
+    const safeLimit = Number.isFinite(parseInt(limit)) ? parseInt(limit) : 10;
+    const safeOffset = Number.isFinite(parseInt(offset)) ? parseInt(offset) : 0;
+    const query = `
+      SELECT id, first_name, last_name, email, phone, company, roles, main_goal, 
+             budget, email_updates, language, created_at, updated_at
+      FROM demo_bookings 
+      ${whereClause}
+      ORDER BY created_at DESC 
+      LIMIT ${safeLimit} OFFSET ${safeOffset}
+    `;
+    
+    const [rows] = await connection.execute(query, queryParams);
+    
+    // 处理返回数据
+    const bookings = rows.map(row => ({
+      id: row.id,
+      firstName: row.first_name,
+      lastName: row.last_name,
+      email: row.email,
+      phone: row.phone,
+      company: row.company,
+      roles: (() => {
+        try {
+          return JSON.parse(row.roles || '[]');
+        } catch (e) {
+          return row.roles ? String(row.roles).split(',').map(s => s.trim()).filter(Boolean) : [];
+        }
+      })(),
+      mainGoal: row.main_goal,
+      budget: row.budget,
+      emailUpdates: row.email_updates,
+      language: row.language,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    }));
+
+    const processingTime = Date.now() - startTime;
+    console.log(`[${requestId}] Demo booking query completed in ${processingTime}ms, found ${bookings.length} records`);
+
+    // 返回成功响应
+    res.status(200).json({
+      success: true,
+      data: bookings,
+      count: bookings.length,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    const processingTime = Date.now() - startTime;
+    console.error(`[${requestId}] Demo booking query error (${processingTime}ms):`, {
       message: error.message,
       stack: error.stack,
       sql: error.sql

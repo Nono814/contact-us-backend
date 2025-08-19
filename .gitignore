@@ -1,22 +1,130 @@
-# dependencies
+# ====================
+# Node.js
+# ====================
 node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
 
-# env files
+# ====================
+# Python Virtual Environment
+# ====================
+.venv/
+venv/
+env/
+ENV/
+bin/
+lib/
+lib64/
+include/
+pyvenv.cfg
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# ====================
+# Environment Variables & Config
+# ====================
+.env
+.env.*
+!/.env.example
 config.env
 config.production.env
+config.*.env
 
-# logs
+# ====================
+# Logs
+# ====================
 logs/
 *.log
 server.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# editor
+# ====================
+# Build & Distribution
+# ====================
+dist/
+build/
+*.tar.gz
+*.zip
+*.rar
+backend-deployment-package.tar.gz
+ops-deployment-package-*.tar.gz
+production-deployment-*.tar.gz
+
+# ====================
+# Editor & IDE
+# ====================
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
 
-# OS
+# ====================
+# OS Generated Files
+# ====================
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
-# others
-.env
-.env.*
+# ====================
+# Runtime & Cache
+# ====================
+.npm
+.cache
+.parcel-cache
+.nyc_output
+coverage/
+
+# ====================
+# Database
+# ====================
+*.sqlite
+*.sqlite3
+*.db
+
+# ====================
+# Temporary Files
+# ====================
+tmp/
+temp/
+*.tmp
+*.temp
+
+# ====================
+# Docker
+# ====================
+.dockerignore
+
+# ====================
+# Deployment Packages (keep only source)
+# ====================
+deployment-package/
+production-deployment-package/
+
+# ====================
+# Screenshots & Media (optional)
+# ====================
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.ico
+
+# ====================
+# Specific to this project
+# ====================
+claude
+hello.py
+diagnose_analytics.sh
