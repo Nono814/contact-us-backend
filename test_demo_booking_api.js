@@ -9,6 +9,7 @@ const validTestData = {
   firstName: "Jane",
   lastName: "Smith",
   email: "jane.smith@techcompany.com",
+  phone: "13800138000",
   company: "Tech Company Inc.",
   roles: ["engineering", "product"],
   mainGoal: "aiTraining",
@@ -210,6 +211,77 @@ async function testDemoBookingAPI() {
   }
   console.log('');
 
+  // 测试 6: 测试phone字段
+  try {
+    log('blue', '测试 6: 测试phone字段（可选字段）');
+    
+    // 测试不带phone字段
+    const dataWithoutPhone = {
+      ...validTestData,
+      email: `test-no-phone-${Date.now()}@example.com`
+    };
+    delete dataWithoutPhone.phone;
+    
+    log('yellow', '测试不带phone字段...');
+    const response1 = await axios.post(TEST_API_URL, dataWithoutPhone, {
+      headers: { 'Content-Type': 'application/json' },
+      timeout: 10000
+    });
+    log('green', '✅ 不带phone字段测试通过');
+    
+    // 等待一下
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // 测试带phone字段
+    const dataWithPhone = {
+      ...validTestData,
+      email: `test-with-phone-${Date.now()}@example.com`,
+      phone: "13800138001"
+    };
+    
+    log('yellow', '测试带phone字段...');
+    const response2 = await axios.post(TEST_API_URL, dataWithPhone, {
+      headers: { 'Content-Type': 'application/json' },
+      timeout: 10000
+    });
+    log('green', '✅ 带phone字段测试通过');
+    
+    // 等待一下
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // 测试过长的phone字段
+    const dataWithLongPhone = {
+      ...validTestData,
+      email: `test-long-phone-${Date.now()}@example.com`,
+      phone: "1".repeat(25) // 超过20字符
+    };
+    
+    log('yellow', '测试过长phone字段（应该返回错误）...');
+    try {
+      await axios.post(TEST_API_URL, dataWithLongPhone, {
+        headers: { 'Content-Type': 'application/json' },
+        timeout: 10000
+      });
+      log('red', '❌ 长phone字段测试失败 - 应该返回验证错误');
+    } catch (phoneError) {
+      if (phoneError.response && phoneError.response.status === 400) {
+        log('green', '✅ 长phone字段测试通过 - 正确返回验证错误');
+      } else {
+        log('red', '❌ 长phone字段测试失败 - 返回了意外错误');
+      }
+    }
+    
+  } catch (error) {
+    log('red', '❌ 测试 6 失败');
+    if (error.response) {
+      console.log('错误状态:', error.response.status);
+      console.log('错误数据:', JSON.stringify(error.response.data, null, 2));
+    } else {
+      console.log('错误信息:', error.message);
+    }
+  }
+  console.log('');
+
   log('blue', '🧪 Demo Booking API 测试完成！');
 }
 
@@ -229,6 +301,7 @@ function generateCurlExamples() {
     firstName: "John",
     lastName: "Doe", 
     email: "john.doe@company.com",
+    phone: "13912345678",
     company: "Example Corp",
     roles: ["engineering"],
     mainGoal: "platform",

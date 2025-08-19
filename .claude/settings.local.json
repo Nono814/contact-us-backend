@@ -30,7 +30,9 @@
       "Bash(mkdir:*)",
       "Bash(pm2 logs:*)",
       "Bash(env)",
-      "Bash(git restore:*)"
+      "Bash(git restore:*)",
+      "Bash(systemctl:*)",
+      "Bash(service mysql:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

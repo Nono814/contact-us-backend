@@ -1,7 +1,21 @@
 数据库 get in touch 创建成功或已存在
 数据库连接成功
 数据库表创建完成
-邮件服务配置验证成功
+✅ 邮件服务配置验证成功
+📧 SMTP配置: smtp.163.com:465
+👤 发送账户: 18264190169@163.com
 服务器运行在端口 8080
 健康检查: http://localhost:8080/health
 管理后台: http://localhost:8080/admin
+[nza4izfu0u] Demo booking request started
+[nza4izfu0u] Demo booking saved with ID: 560
+[nza4izfu0u] Demo booking completed in 12ms
+[Email] Demo booking phone: 13900139000
+[76zxst4y2gr] Demo booking request started
+[76zxst4y2gr] Demo booking saved with ID: 561
+[76zxst4y2gr] Demo booking completed in 13ms
+[Email] Demo booking phone: 无
+✅ Demo预约邮件通知发送成功 - ID: db_560
+[nza4izfu0u] Email notification sent successfully
+✅ Demo预约邮件通知发送成功 - ID: db_561
+[76zxst4y2gr] Email notification sent successfully
