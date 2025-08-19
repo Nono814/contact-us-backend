@@ -129,6 +129,65 @@ node_modules/
 - 合并冲突
   - `git status` 查看冲突文件，按标记编辑后：`git add <文件>` → `git commit`（或继续 rebase/merge 流程）。
 
+#### 遇到“Missing or invalid credentials.” 或 VSCode/Cursor askpass 报错（ECONNREFUSED）
+
+现象示例：
+
+```
+Missing or invalid credentials.
+Error: connect ECONNREFUSED /tmp/vscode-git-xxxx.sock
+fatal: Authentication failed for 'https://github.com/<user>/<repo>.git/'
+```
+
+原因：编辑器的 `GIT_ASKPASS` 助手干扰或凭据未配置。
+
+解决步骤（HTTPS + PAT 推荐）：
+
+```bash
+# 1) 临时关闭编辑器 askpass 影响（当前终端会话生效）
+unset GIT_ASKPASS
+
+# 2) 使用 GitHub PAT 进行认证并保存（首次）
+git config --global credential.helper store
+
+# 3) 推送（首次推送建议带 -u 建立 upstream）
+git push -u origin <分支名>
+# 出现 Username 时：输入你的 GitHub 用户名
+# 出现 Password 时：粘贴你的 GitHub Personal Access Token（PAT），不是登录密码
+```
+
+若想排查环境：
+
+```bash
+git config --show-origin -l | grep credential.helper || true
+env | grep -E '^GIT_(ASKPASS|CREDENTIAL_HELPER)=' || true
+git remote -v
+```
+
+可选方案：
+
+- 使用 SSH 免密推送
+
+```bash
+ssh-keygen -t ed25519 -C "你的邮箱"
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_ed25519
+cat ~/.ssh/id_ed25519.pub  # 复制到 GitHub → Settings → SSH and GPG keys
+git remote set-url origin git@github.com:<你的账号>/<你的仓库>.git
+git push -u origin <分支名>
+```
+
+- 临时把 PAT 写入远程 URL（不推荐，注意安全）
+
+```bash
+git remote set-url origin https://<PAT>@github.com/<你的账号>/<你的仓库>.git
+git push -u origin <分支名>
+# 推送完建议立刻改回不带令牌的 URL，并妥善保管/轮换令牌
+git remote set-url origin https://github.com/<你的账号>/<你的仓库>.git
+```
+
+注意：`git add -A` 中间有空格，`add-A` 是错误写法。
+
 ### 实用示例（以当前仓库为例）
 
 当前分支：`contact-us-backend` ；远程：`origin` → `https://github.com/Nono814/contact-us-backend.git`
