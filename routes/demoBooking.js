@@ -50,7 +50,8 @@ const fieldOptions = {
   mainGoal: ['aiTraining', 'hiring', 'platform'],
   budget: ['large', 'medium', 'small', 'explore'],
   emailUpdates: ['yes', 'no'],
-  language: ['en', 'zh']
+  language: ['en', 'zh'],
+  contactType: ['phone', 'wechat']
 };
 
 // 字段标签映射
@@ -126,12 +127,23 @@ function validateDemoBooking(data) {
     errors.email = 'Invalid email format';
   }
 
-  // 手机号验证（可选字段）
-  if (data.phone) {
-    if (typeof data.phone !== 'string') {
-      errors.phone = 'Phone must be a string';
-    } else if (data.phone.length > 20) {
-      errors.phone = 'Phone must be 20 characters or less';
+  // 联系方式验证
+  if (!data.contactType || !fieldOptions.contactType.includes(data.contactType)) {
+    errors.contactType = 'Contact type must be either phone or wechat';
+  } else {
+    // 根据联系方式类型验证对应字段
+    if (data.contactType === 'phone') {
+      if (!data.phone || typeof data.phone !== 'string' || data.phone.trim().length === 0) {
+        errors.phone = 'Phone number is required when contact type is phone';
+      } else if (data.phone.length > 20) {
+        errors.phone = 'Phone must be 20 characters or less';
+      }
+    } else if (data.contactType === 'wechat') {
+      if (!data.wechatId || typeof data.wechatId !== 'string' || data.wechatId.trim().length === 0) {
+        errors.wechatId = 'WeChat ID is required when contact type is wechat';
+      } else if (data.wechatId.length > 50) {
+        errors.wechatId = 'WeChat ID must be 50 characters or less';
+      }
     }
   }
 
@@ -215,6 +227,8 @@ router.post('/demo-booking', demoBookingLimiter, async (req, res) => {
       lastName,
       email,
       phone,
+      wechatId,
+      contactType,
       company,
       roles,
       mainGoal,
@@ -252,16 +266,27 @@ router.post('/demo-booking', demoBookingLimiter, async (req, res) => {
       });
     }
 
+    // 根据联系方式类型处理数据
+    let phoneValue = null;
+    let wechatValue = null;
+    
+    if (contactType === 'phone') {
+      phoneValue = phone ? phone.trim() : null;
+    } else if (contactType === 'wechat') {
+      wechatValue = wechatId ? wechatId.trim() : null;
+    }
+
     // 插入数据库 - 适配实际表结构
     const [result] = await connection.execute(
       `INSERT INTO demo_bookings 
-       (first_name, last_name, email, phone, company, roles, main_goal, budget, email_updates, language, user_ip, user_agent) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       (first_name, last_name, email, phone, wechat, company, roles, main_goal, budget, email_updates, language, user_ip, user_agent) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         firstName.trim(),
         lastName.trim(),
         email.trim().toLowerCase(),
-        phone ? phone.trim() : null,
+        phoneValue,
+        wechatValue,
         company.trim(),
         JSON.stringify(roles),
         mainGoal,
@@ -286,7 +311,9 @@ router.post('/demo-booking', demoBookingLimiter, async (req, res) => {
           firstName,
           lastName,
           email,
-          phone,
+          phone: phoneValue,
+          wechat: wechatValue,
+          contactType,
           company,
           roles,
           mainGoal,
@@ -378,7 +405,7 @@ router.get('/demo-booking', async (req, res) => {
     const safeLimit = Number.isFinite(parseInt(limit)) ? parseInt(limit) : 10;
     const safeOffset = Number.isFinite(parseInt(offset)) ? parseInt(offset) : 0;
     const query = `
-      SELECT id, first_name, last_name, email, phone, company, roles, main_goal, 
+      SELECT id, first_name, last_name, email, phone, wechat, company, roles, main_goal, 
              budget, email_updates, language, created_at, updated_at
       FROM demo_bookings 
       ${whereClause}
@@ -395,6 +422,7 @@ router.get('/demo-booking', async (req, res) => {
       lastName: row.last_name,
       email: row.email,
       phone: row.phone,
+      wechat: row.wechat,
       company: row.company,
       roles: (() => {
         try {

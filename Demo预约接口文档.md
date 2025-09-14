@@ -27,6 +27,9 @@ Content-Type: application/json
 | firstName | string | ✅ | ≤50字符 | 用户名字 | "张" |
 | lastName | string | ✅ | ≤50字符 | 用户姓氏 | "三" |
 | email | string | ✅ | - | 用户邮箱地址 | "zhangsan@company.com" |
+| contactType | string | ✅ | - | 联系方式类型 | "phone" 或 "wechat" |
+| phone | string | ❌ | ≤20字符 | 手机号码（contactType为phone时必填） | "+86-138-0013-8000" |
+| wechatId | string | ❌ | ≤50字符 | 微信号（contactType为wechat时必填） | "zhangsan_wechat" |
 | company | string | ✅ | ≤100字符 | 公司名称 | "科技有限公司" |
 | roles | array | ✅ | - | 职位角色(多选) | ["engineering", "product"] |
 | mainGoal | string | ✅ | - | 主要目标 | "aiTraining" |
@@ -37,7 +40,14 @@ Content-Type: application/json
 
 ## 字段选项说明
 
-### 1. roles (职位角色) - 多选数组
+### 1. contactType (联系方式类型) - 单选
+
+| 值 | 描述 | 必填字段 |
+|----|------|----------|
+| phone | 手机号码 | phone字段必填，wechatId字段留空 |
+| wechat | 微信号 | wechatId字段必填，phone字段留空 |
+
+### 2. roles (职位角色) - 多选数组
 
 | 值 | 英文标签 | 中文标签 |
 |----|----------|----------|
@@ -50,7 +60,7 @@ Content-Type: application/json
 | procurement | Procurement / Legal | 采购 / 法务 |
 | other | Other | 其他 |
 
-### 2. mainGoal (主要目标) - 单选
+### 3. mainGoal (主要目标) - 单选
 
 | 值 | 英文标签 | 中文标签 |
 |----|----------|----------|
@@ -58,7 +68,7 @@ Content-Type: application/json
 | hiring | Hiring full-time or contract workers to join my team | 招聘全职或合同员工加入我的团队 |
 | platform | I want to learn more about your platform | 我想了解更多关于您的平台 |
 
-### 3. budget (预算范围) - 单选
+### 4. budget (预算范围) - 单选
 
 | 值 | 英文标签 | 中文标签 |
 |----|----------|----------|
@@ -67,14 +77,14 @@ Content-Type: application/json
 | small | < $50,000 / quarter (1 - 2 people) | < ¥50万 / 季度 (1 - 2 人) |
 | explore | No specific project in mind yet, I just want to learn more | 暂无具体项目，只想了解更多 |
 
-### 4. emailUpdates (邮件订阅) - 单选
+### 5. emailUpdates (邮件订阅) - 单选
 
 | 值 | 英文标签 | 中文标签 |
 |----|----------|----------|
 | yes | Yes | 是的 |
 | no | Not right now | 暂时不需要 |
 
-### 5. language (语言偏好) - 单选
+### 6. language (语言偏好) - 单选
 
 | 值 | 描述 |
 |----|------|
@@ -83,19 +93,39 @@ Content-Type: application/json
 
 ## 请求示例
 
-### 基础请求示例
+### 基础请求示例 - 中文版（选择微信号）
 
 ```json
 {
   "firstName": "张",
   "lastName": "三",
   "email": "zhangsan@company.com",
+  "contactType": "wechat",
+  "wechatId": "zhangsan_wechat_123",
   "company": "ABC科技有限公司",
   "roles": ["engineering", "product"],
   "mainGoal": "aiTraining",
   "budget": "medium",
   "emailUpdates": "yes",
   "language": "zh"
+}
+```
+
+### 基础请求示例 - 英文版（选择手机号）
+
+```json
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@company.com",
+  "contactType": "phone",
+  "phone": "+1-555-123-4567",
+  "company": "Tech Company Inc",
+  "roles": ["research", "executive"],
+  "mainGoal": "hiring",
+  "budget": "large",
+  "emailUpdates": "no",
+  "language": "en"
 }
 ```
 
